@@ -22,7 +22,7 @@ jobs:
   pwa-preflight:
     name: Check isolated preview PWA readiness
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out this branch
         uses: actions/checkout@v4
@@ -33,6 +33,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Set up JDK 17 for non-interactive Bubblewrap validation
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configure Bubblewrap without interactive prompts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${JAVA_HOME:-}"
+          test -n "${ANDROID_HOME:-}"
+          mkdir -p "$HOME/.bubblewrap"
+          node -e 'const fs=require("node:fs"); fs.writeFileSync(process.env.HOME+"/.bubblewrap/config.json", JSON.stringify({jdkPath:process.env.JAVA_HOME,androidSdkPath:process.env.ANDROID_HOME},null,2)+"\\n")'
+          npx --yes @bubblewrap/cli doctor
 
       - name: Verify isolated preview manifest is reachable and has expected basics
         shell: bash
@@ -71,7 +90,7 @@ jobs:
               errors.push('Manifest must include 192x192 and 512x512 icons');
             }
             if (errors.length) {
-              console.error(errors.join('\n'));
+              console.error(errors.join('\\n'));
               process.exit(1);
             }
             console.log('Preview manifest basics passed. NOTE: this is a preview origin, not the final Play Store origin.');
@@ -79,14 +98,10 @@ jobs:
           NODE
 
       - name: Run Bubblewrap PWA validation against isolated preview
-        if: always()
         shell: bash
         run: |
-          set +e
+          set -o pipefail
           npx --yes @bubblewrap/cli validate --url=https://android-twa-scaffold.blaban-sweets.pages.dev 2>&1 | tee bubblewrap-validation.log
-          status=${PIPESTATUS[0]}
-          echo "Bubblewrap validation exit code: ${status}" | tee -a bubblewrap-validation.log
-          exit "${status}"
 
       - name: Upload preflight report
         if: always()
