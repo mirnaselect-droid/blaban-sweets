@@ -1,6 +1,6 @@
-const CACHE_NAME = "blaban-shell-v2";
+const CACHE_NAME = "blaban-shell-v3";
 const CACHE_PREFIX = "blaban-shell-";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/icons/blaban-icon.svg"];
+const APP_SHELL = ["/", "/manifest.webmanifest", "/icons/blaban-icon.svg", "/icons/blaban-icon-192.png", "/icons/blaban-icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
