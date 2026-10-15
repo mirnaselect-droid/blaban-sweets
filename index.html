@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#153b74">
+<link rel="manifest" href="/manifest.webmanifest">
  <meta name="google-site-verification" content="jSYA1EoFHLDIAUue3qkAmjle8t8wkJsBg6YDsC7N_vk" />
 <meta name="description" content="حلو ب لبن — مع حلو ب لبن / حلى أيامك">
 <title>حلو ب لبن | مع حلو ب لبن / حلى أيامك</title>
@@ -438,6 +439,36 @@ document.getElementById("checkout")?.addEventListener("click",event=>{
 document.addEventListener("keydown",event=>{
  if(event.key==="Escape"&&document.getElementById("checkout")?.classList.contains("checkout-modal-open"))closeCheckoutModal();
 });
+
+let deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  const actions = document.querySelector(".head-actions");
+  if (!actions || document.getElementById("installAppBtn")) return;
+  const button = document.createElement("button");
+  button.id = "installAppBtn";
+  button.type = "button";
+  button.className = "btn pale";
+  button.textContent = "تثبيت التطبيق";
+  button.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    button.remove();
+  });
+  actions.prepend(button);
+});
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  document.getElementById("installAppBtn")?.remove();
+});
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
 
 showProducts();
 </script>
