@@ -24,7 +24,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Validate web app manifest and PNG icons
+      - name: Validate app manifest, PNG icons, and customer/admin separation
         run: |
           node <<'NODE'
           const fs = require('node:fs');
@@ -34,6 +34,12 @@ jobs:
           }
           if (manifest.display !== 'standalone') {
             throw new Error('Manifest display must be standalone');
+          }
+          if (manifest.start_url !== '/' || manifest.scope !== '/') {
+            throw new Error('Customer app must launch at the storefront root');
+          }
+          if ((manifest.shortcuts || []).some(item => /admin|إدارة/i.test(String(item.url) + ' ' + String(item.name)))) {
+            throw new Error('Admin route must not be exposed as a customer app shortcut');
           }
           for (const expected of [
             { path: 'icons/blaban-icon-192.png', size: 192 },
@@ -61,5 +67,11 @@ jobs:
           ]) {
             if (!sw.includes(path)) throw new Error('Service worker does not cache ' + path);
           }
-          console.log('Manifest, PNG dimensions, and service-worker icon references validated.');
+          if (!/url\.pathname\s*===\s*["']\/admin\.html["']/.test(sw)) {
+            throw new Error('Service worker must explicitly bypass the admin route');
+          }
+          if (!/if\s*\(url\.pathname\s*!==\s*["']\/["']\)\s*return/.test(sw)) {
+            throw new Error('Service worker must only cache the storefront navigation shell');
+          }
+          console.log('Manifest, PNG dimensions, storefront launch, and admin-route separation validated.');
           NODE
