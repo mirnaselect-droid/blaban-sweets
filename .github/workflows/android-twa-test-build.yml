@@ -77,6 +77,7 @@ jobs:
           keytool -genkeypair -v -keystore android-twa/android-keystore -storepass "$TEST_KEY_PASSWORD" -alias android -keypass "$TEST_KEY_PASSWORD" -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=BLABAN-SWEETS, OU=Apps, O=BLABAN-SWEETS, C=EG" -storetype JKS
           cat > /tmp/init-bubblewrap.exp <<'EXPECT'
           set timeout 180
+          log_user 1
           # Fail immediately on a prompt mismatch. Expect otherwise returns "timeout" and the
           # script would keep sending answers into the wrong prompts, corrupting the setup.
           expect_before timeout { puts stderr "ERROR: Timed out waiting for the expected Bubblewrap prompt; aborting safely."; exit 124 }
@@ -86,41 +87,41 @@ jobs:
 
           # Answer each prompt in order. Do not use a catch-all matcher: Inquirer redraws
           # old prompts in the terminal and broad matchers can send an answer to the wrong field.
-          expect -nocase -re {\?[^\n]{0,40}Domain:}
+          expect -nocase -re {Domain:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}URL path:}
+          expect -nocase -re {URL path:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Application name:}
+          expect -nocase -re {Application name:}
           send "BLABAN-SWEETS\r"
-          expect -nocase -re {\?[^\n]{0,40}Short name:}
+          expect -nocase -re {Short name:}
           send "BLABAN\r"
-          expect -nocase -re {\?[^\n]{0,40}Application ID:}
+          expect -nocase -re {Application ID:}
           send "com.blabansweets.app\r"
-          expect -nocase -re {\?[^\n]{0,40}Starting version code for the new app version:}
+          expect -nocase -re {Starting version code for the new app version:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Display mode:}
+          expect -nocase -re {Display mode:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Orientation:}
+          expect -nocase -re {Orientation:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Status bar color:}
+          expect -nocase -re {Status bar color:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Splash screen color:}
+          expect -nocase -re {Splash screen color:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Icon URL:}
+          expect -nocase -re {Icon URL:}
           send "$icon\r"
-          expect -nocase -re {\?[^\n]{0,40}Maskable icon URL:}
+          expect -nocase -re {Maskable icon URL:}
           send "$icon\r"
-          expect -nocase -re {\?[^\n]{0,40}Include app shortcuts\?}
+          expect -nocase -re {Include app shortcuts}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Monochrome icon URL:}
+          expect -nocase -re {Monochrome icon URL:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Include support for Play Billing\?}
+          expect -nocase -re {Include support for Play Billing}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Request geolocation permission\?}
+          expect -nocase -re {Request geolocation permission}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Key store location:}
+          expect -nocase -re {Key store location:}
           send "\r"
-          expect -nocase -re {\?[^\n]{0,40}Key name:}
+          expect -nocase -re {Key name:}
           send "android\r"
           expect eof
           catch wait result
