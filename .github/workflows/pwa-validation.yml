@@ -73,5 +73,25 @@ jobs:
           if (!/if\s*\(url\.pathname\s*!==\s*["']\/["']\)\s*return/.test(sw)) {
             throw new Error('Service worker must only cache the storefront navigation shell');
           }
-          console.log('Manifest, PNG dimensions, storefront launch, and admin-route separation validated.');
+          const storefront = fs.readFileSync('index.html', 'utf8');
+          const admin = fs.readFileSync('admin.html', 'utf8');
+          if (!/rpc\(["']create_store_order["']/.test(storefront)) {
+            throw new Error('Checkout must submit orders through the validated create_store_order RPC');
+          }
+          const rpcStart = storefront.indexOf('rpc("create_store_order"');
+          const rpcEnd = rpcStart >= 0 ? storefront.indexOf('});', rpcStart) : -1;
+          if (rpcStart < 0 || rpcEnd < 0) {
+            throw new Error('Could not verify create_store_order arguments in checkout');
+          }
+          const rpcCall = storefront.slice(rpcStart, rpcEnd);
+          if (/p_(?:price|subtotal|total_amount|delivery_fee)\s*:/.test(rpcCall)) {
+            throw new Error('Checkout must not send client-calculated prices or totals to the order RPC');
+          }
+          if (!/admin_users/.test(admin) || !/signOut/.test(admin)) {
+            throw new Error('Admin UI must check admin membership and reject non-admin sessions');
+          }
+          if (/service[_-]?role|sb_secret_/i.test(storefront + admin)) {
+            throw new Error('Secret/service-role credentials must never be embedded in browser HTML');
+          }
+          console.log('PWA assets, checkout RPC boundary, no client price submission, and admin separation validated.');
           NODE
