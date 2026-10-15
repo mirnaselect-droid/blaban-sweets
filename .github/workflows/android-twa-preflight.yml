@@ -63,16 +63,13 @@ jobs:
           NODE
 
       - name: Run Bubblewrap PWA validation
-        id: bubblewrap
         shell: bash
         run: |
           set +e
           npx --yes @bubblewrap/cli validate --url=https://blaban-sweets.pages.dev 2>&1 | tee bubblewrap-validation.log
           status=${PIPESTATUS[0]}
           echo "Bubblewrap validation exit code: ${status}" | tee -a bubblewrap-validation.log
-          echo "exit_code=${status}" >> "$GITHUB_OUTPUT"
-          # Preserve diagnostics as an artifact; this step does not claim an AAB was built.
-          exit 0
+          exit "${status}"
 
       - name: Upload preflight report
         if: always()
