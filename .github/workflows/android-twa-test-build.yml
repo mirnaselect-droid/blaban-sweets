@@ -65,6 +65,7 @@ jobs:
           bubblewrap doctor
 
       - name: Generate isolated TWA project with temporary test key
+        timeout-minutes: 8
         shell: bash
         run: |
           set -euo pipefail
