@@ -25,6 +25,7 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname === "/admin.html" || url.pathname.startsWith("/rest/") || url.pathname.startsWith("/auth/")) return;
 
   if (request.mode === "navigate") {
+    if (url.pathname !== "/") return;
     event.respondWith(
       fetch(request).then((response) => {
         if (response.ok && url.pathname !== "/admin.html") {
