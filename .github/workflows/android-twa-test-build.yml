@@ -104,6 +104,8 @@ jobs:
           send "$icon\r"
           expect -nocase -re {Maskable icon URL:}
           send "$icon\r"
+          expect -nocase -re {Include app shortcuts\?}
+          send "\r"
           expect -nocase -re {Monochrome icon URL:}
           send "\r"
           expect -nocase -re {Include support for Play Billing\?}
