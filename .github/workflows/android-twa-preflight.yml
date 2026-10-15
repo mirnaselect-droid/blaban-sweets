@@ -1,0 +1,84 @@
+name: Android TWA preflight
+
+on:
+  push:
+    branches:
+      - android-twa-scaffold
+    paths:
+      - '.github/workflows/android-twa-preflight.yml'
+      - 'ANDROID-TWA-BUILD.md'
+      - 'manifest.webmanifest'
+      - 'icons/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-twa-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pwa-preflight:
+    name: Check public PWA readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out this branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify production manifest is reachable and has expected basics
+        shell: bash
+        run: |
+          node <<'NODE'
+          const url = 'https://blaban-sweets.pages.dev/manifest.webmanifest';
+          const expectedName = 'BLABAN-SWEETS | حلو ب لبن';
+          const expectedStart = '/';
+          (async () => {
+            const response = await fetch(url, { redirect: 'follow' });
+            if (!response.ok) throw new Error(`Manifest request failed: HTTP ${response.status}`);
+            const manifest = await response.json();
+            const errors = [];
+            if (manifest.name !== expectedName) errors.push(`Unexpected name: ${manifest.name}`);
+            if (manifest.start_url !== expectedStart) errors.push(`Unexpected start_url: ${manifest.start_url}`);
+            if (manifest.scope !== '/') errors.push(`Unexpected scope: ${manifest.scope}`);
+            if (manifest.dir !== 'rtl') errors.push(`Expected dir=rtl, got: ${manifest.dir}`);
+            if (manifest.display !== 'standalone') errors.push(`Expected display=standalone, got: ${manifest.display}`);
+            if (!Array.isArray(manifest.icons) || !manifest.icons.some(i => i.sizes === '192x192') || !manifest.icons.some(i => i.sizes === '512x512')) {
+              errors.push('Manifest must include 192x192 and 512x512 icons');
+            }
+            if (errors.length) {
+              console.error(errors.join('\n'));
+              process.exit(1);
+            }
+            console.log('Manifest reachable. Expected name, launch path, scope, RTL, standalone display, and icon sizes passed.');
+          })().catch(e => { console.error(e); process.exit(1); });
+          NODE
+
+      - name: Run Bubblewrap PWA validation
+        id: bubblewrap
+        shell: bash
+        run: |
+          set +e
+          npx --yes @bubblewrap/cli validate --url=https://blaban-sweets.pages.dev 2>&1 | tee bubblewrap-validation.log
+          status=${PIPESTATUS[0]}
+          echo "Bubblewrap validation exit code: ${status}" | tee -a bubblewrap-validation.log
+          echo "exit_code=${status}" >> "$GITHUB_OUTPUT"
+          # Preserve diagnostics as an artifact; this step does not claim an AAB was built.
+          exit 0
+
+      - name: Upload preflight report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-twa-preflight-report
+          path: bubblewrap-validation.log
+          if-no-files-found: warn
+          retention-days: 7
