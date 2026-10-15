@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - android-play-prep
+      - pwa-safe-main
   pull_request:
     branches:
       - feature/pwa-app-foundation
@@ -12,6 +13,10 @@ on:
       - "manifest.webmanifest"
       - "sw.js"
       - "icons/**"
+      - "index.html"
+      - "admin.html"
+      - "_headers"
+      - "ANDROID-PLAY-READINESS.md"
       - ".github/workflows/pwa-validation.yml"
 
 permissions:
