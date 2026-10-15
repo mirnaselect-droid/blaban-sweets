@@ -1,0 +1,65 @@
+name: Validate BLABAN-SWEETS PWA assets
+
+on:
+  push:
+    branches:
+      - android-play-prep
+  pull_request:
+    branches:
+      - feature/pwa-app-foundation
+      - main
+    paths:
+      - "manifest.webmanifest"
+      - "sw.js"
+      - "icons/**"
+      - ".github/workflows/pwa-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pwa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate web app manifest and PNG icons
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
+          if (manifest.name !== 'BLABAN-SWEETS | حلو ب لبن') {
+            throw new Error('Unexpected app name in manifest');
+          }
+          if (manifest.display !== 'standalone') {
+            throw new Error('Manifest display must be standalone');
+          }
+          for (const expected of [
+            { path: 'icons/blaban-icon-192.png', size: 192 },
+            { path: 'icons/blaban-icon-512.png', size: 512 },
+          ]) {
+            const icon = manifest.icons.find(item => item.src === '/' + expected.path);
+            if (!icon || icon.sizes !== expected.size + 'x' + expected.size || icon.type !== 'image/png') {
+              throw new Error('Missing or incorrectly declared icon: ' + expected.path);
+            }
+            const bytes = fs.readFileSync(expected.path);
+            const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+            if (bytes.length < 24 || !bytes.subarray(0, 8).equals(signature)) {
+              throw new Error('Invalid PNG file: ' + expected.path);
+            }
+            const width = bytes.readUInt32BE(16);
+            const height = bytes.readUInt32BE(20);
+            if (width !== expected.size || height !== expected.size) {
+              throw new Error('Unexpected dimensions for ' + expected.path + ': ' + width + 'x' + height);
+            }
+          }
+          const sw = fs.readFileSync('sw.js', 'utf8');
+          for (const path of [
+            '/icons/blaban-icon-192.png',
+            '/icons/blaban-icon-512.png',
+          ]) {
+            if (!sw.includes(path)) throw new Error('Service worker does not cache ' + path);
+          }
+          console.log('Manifest, PNG dimensions, and service-worker icon references validated.');
+          NODE
