@@ -40,14 +40,20 @@ jobs:
           node <<'NODE'
           const url = 'https://blaban-sweets.pages.dev/manifest.webmanifest';
           const expectedName = 'BLABAN-SWEETS | حلو ب لبن';
-          const expectedStart = '/';
           (async () => {
             const response = await fetch(url, { redirect: 'follow' });
+            console.log('Manifest URL after redirects:', response.url);
+            console.log('HTTP status:', response.status);
+            console.log('Content-Type:', response.headers.get('content-type'));
             if (!response.ok) throw new Error(`Manifest request failed: HTTP ${response.status}`);
-            const manifest = await response.json();
+            const body = await response.text();
+            if (!/json/i.test(response.headers.get('content-type') || '') && !body.trimStart().startsWith('{')) {
+              throw new Error('Manifest URL returned HTML or another non-JSON response; TWA build is blocked until the correct public manifest URL is confirmed.');
+            }
+            const manifest = JSON.parse(body);
             const errors = [];
             if (manifest.name !== expectedName) errors.push(`Unexpected name: ${manifest.name}`);
-            if (manifest.start_url !== expectedStart) errors.push(`Unexpected start_url: ${manifest.start_url}`);
+            if (manifest.start_url !== '/') errors.push(`Unexpected start_url: ${manifest.start_url}`);
             if (manifest.scope !== '/') errors.push(`Unexpected scope: ${manifest.scope}`);
             if (manifest.dir !== 'rtl') errors.push(`Expected dir=rtl, got: ${manifest.dir}`);
             if (manifest.display !== 'standalone') errors.push(`Expected display=standalone, got: ${manifest.display}`);
@@ -63,6 +69,7 @@ jobs:
           NODE
 
       - name: Run Bubblewrap PWA validation
+        if: always()
         shell: bash
         run: |
           set +e
