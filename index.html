@@ -472,4 +472,65 @@ if ("serviceWorker" in navigator) {
 
 showProducts();
 </script>
+
+<style>
+/* Native-app-like navigation for narrow screens; desktop storefront remains unchanged. */
+.app-bottom-nav{display:none}
+@media(max-width:700px){
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom, 0px))}
+  .app-bottom-nav{
+    position:fixed;inset:auto 0 0;z-index:70;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    background:#fffdf2f2;backdrop-filter:blur(18px);
+    border-top:1px solid #e8e8ef;
+    box-shadow:0 -8px 28px #153b7410
+  }
+  .app-bottom-nav a{
+    min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    color:#69758a;font-size:.72rem;font-weight:800;border-radius:12px;position:relative
+  }
+  .app-bottom-nav a .nav-icon{font-size:1.12rem;line-height:1.25}
+  .app-bottom-nav a.active{background:#eaf2ff;color:#153b74}
+  .app-bottom-nav .nav-cart-count{
+    position:absolute;top:1px;right:calc(50% - 24px);min-width:17px;height:17px;padding:0 4px;
+    border-radius:99px;background:#cf5684;color:white;font-size:.65rem;display:grid;place-items:center
+  }
+  body.checkout-lock .app-bottom-nav{display:none}
+}
+</style>
+<nav class="app-bottom-nav" aria-label="التنقل الرئيسي للتطبيق">
+  <a href="#home" class="active" data-app-nav><span class="nav-icon" aria-hidden="true">⌂</span><span>الرئيسية</span></a>
+  <a href="#categories" data-app-nav><span class="nav-icon" aria-hidden="true">☷</span><span>المنيو</span></a>
+  <a href="#checkout" data-app-nav><span class="nav-icon" aria-hidden="true">🛒</span><span>السلة</span><span class="nav-cart-count" id="appCartCount">0</span></a>
+  <a href="#contact" data-app-nav><span class="nav-icon" aria-hidden="true">♡</span><span>تواصل</span></a>
+</nav>
+<script>
+(() => {
+  const navLinks = [...document.querySelectorAll("[data-app-nav]")];
+  const targets = navLinks.map(link => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+  const setActive = (hash) => navLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === hash));
+  navLinks.forEach(link => link.addEventListener("click", () => setActive(link.getAttribute("href"))));
+  window.addEventListener("hashchange", () => setActive(location.hash || "#home"));
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => b.intersectionRatio-a.intersectionRatio)[0];
+      if (visible) {
+        const id = visible.target.id === "checkout" ? "#checkout" : visible.target.id === "categories" ? "#categories" : visible.target.id === "contact" ? "#contact" : "#home";
+        setActive(id);
+      }
+    }, {rootMargin:"-20% 0px -55% 0px",threshold:[0,.2,.5]});
+    targets.forEach(target => observer.observe(target));
+  }
+  const syncCartCount = () => {
+    const source = document.getElementById("cartCount");
+    const target = document.getElementById("appCartCount");
+    if (source && target) target.textContent = source.textContent.trim() || "0";
+  };
+  syncCartCount();
+  const count = document.getElementById("cartCount");
+  if (count && "MutationObserver" in window) new MutationObserver(syncCartCount).observe(count,{childList:true,characterData:true,subtree:true});
+})();
+</script>
+
 </body></html>
