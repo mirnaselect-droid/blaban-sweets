@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "BLABAN-SWEETS | حلو ب لبن",
+  "short_name": "BLABAN",
+  "description": "اطلبي حلوياتك المفضلة من BLABAN-SWEETS",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fffaf4",
+  "theme_color": "#153b74",
+  "icons": [
+    {
+      "src": "/icons/blaban-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
