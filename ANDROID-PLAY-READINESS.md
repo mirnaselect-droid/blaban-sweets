@@ -14,11 +14,8 @@
 - The owner reports testing checkout/orders and the admin interface on the preview successfully.
 - This is not yet a signed Android App Bundle (AAB), and it is not ready to publish to Google Play.
 
-## Monetization option (not implemented yet)
-- Google AdMob supports app-open ads that can appear during an app's loading/splash screen, subject to eligibility, ad availability, frequency controls, privacy disclosures, and Google Play / AdMob policies.
-- A PWA alone does not automatically earn money on every launch. For this Android TWA, native AdMob integration and testing would be a separate development step; no ad SDK, ad unit IDs, or live ads are currently configured.
-- Do not promise income per launch: an ad may not load or be served, and revenue varies. Never click your own live ads or encourage artificial/repeated opens; invalid traffic can lead to withheld earnings or account restrictions.
-- Because BLABAN-SWEETS is a shopping app, ads should not block checkout or mislead customers. Before implementation, get the owner's explicit choice on whether to add app-open ads and how often they may appear. Keep monetization accounts and payout ownership clearly documented if the store/app is sold.
+## Deferred decisions
+- Monetization is intentionally postponed; do not add ads, ad SDKs, or monetization configuration until the owner explicitly reopens that topic.
 
 ## Safe release sequence
 1. Keep changes isolated on `pwa-safe-main` and verify the preview after each update; do not merge to `main` without explicit owner approval.
