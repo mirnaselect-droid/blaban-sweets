@@ -18,5 +18,19 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "اطلبي الآن",
+      "short_name": "المنيو",
+      "description": "افتحي قائمة منتجات حلو ب لبن",
+      "url": "/#categories"
+    },
+    {
+      "name": "السلة والمشتريات",
+      "short_name": "السلة",
+      "description": "راجعي مشترياتك وأكملي الطلب",
+      "url": "/#checkout"
+    }
   ]
 }
