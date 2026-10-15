@@ -443,6 +443,8 @@ document.getElementById("checkout")?.addEventListener("click",event=>{
 document.addEventListener("keydown",event=>{
  if(event.key==="Escape"&&document.getElementById("checkout")?.classList.contains("checkout-modal-open"))closeCheckoutModal();
 });
+// Support direct app shortcuts such as /#checkout, not only in-page clicks.
+if (location.hash === "#checkout") openCheckoutModal();
 
 let deferredInstallPrompt = null;
 function ensureInstallButton() {
