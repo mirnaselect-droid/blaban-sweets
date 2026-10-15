@@ -49,7 +49,7 @@ jobs:
           echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
           SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
           echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
-          LICENSE_ACCEPTANCES="$(printf 'y\\n%.0s' {1..100})"
+          LICENSE_ACCEPTANCES="$(printf 'y\n%.0s' {1..100})"
           "$SDKMANAGER" --licenses <<< "$LICENSE_ACCEPTANCES" >/dev/null
           "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;36.1.0"
           if [ ! -e "$SDK_ROOT/bin" ]; then ln -s "$SDKMANAGER_DIR" "$SDK_ROOT/bin"; fi
@@ -61,16 +61,14 @@ jobs:
           sudo apt-get install -y expect
           npm install --global @bubblewrap/cli
           mkdir -p "$HOME/.bubblewrap"
-          node -e 'const fs=require("node:fs"); fs.writeFileSync(process.env.HOME+"/.bubblewrap/config.json", JSON.stringify({jdkPath:process.env.JAVA_HOME,androidSdkPath:process.env.ANDROID_HOME},null,2)+"\\n")'
+          node -e 'const fs=require("node:fs"); fs.writeFileSync(process.env.HOME+"/.bubblewrap/config.json", JSON.stringify({jdkPath:process.env.JAVA_HOME,androidSdkPath:process.env.ANDROID_HOME},null,2)+"\n")'
           bubblewrap doctor
 
       - name: Generate isolated TWA project with temporary test key
         shell: bash
-        env:
-          TEST_KEY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # The generated signing key is temporary and will never be uploaded as an artifact.
+          # A fresh, disposable signing key is generated for this CI run only.
           TEST_KEY_PASSWORD="$(openssl rand -hex 16)"
           export TEST_KEY_PASSWORD
           mkdir -p android-twa
@@ -79,14 +77,14 @@ jobs:
           set pass $env(TEST_KEY_PASSWORD)
           spawn npx --yes @bubblewrap/cli init --manifest=https://blaban-sweets.pages.dev/manifest.webmanifest --directory=android-twa
           expect {
-            -re "(?i)package[[:space:]]*id.*" { send "com.blabansweets.app\\r"; exp_continue }
-            -re "(?i)key.?store.*password.*" { send "$pass\\r"; exp_continue }
-            -re "(?i)key password.*" { send "$pass\\r"; exp_continue }
-            -re "(?i)full name.*" { send "BLABAN-SWEETS\\r"; exp_continue }
-            -re "(?i)organizational unit.*" { send "Apps\\r"; exp_continue }
-            -re "(?i)organization.*" { send "BLABAN-SWEETS\\r"; exp_continue }
-            -re "(?i)country.*" { send "EG\\r"; exp_continue }
-            -re "\\? .*" { send "\\r"; exp_continue }
+            -re "(?i)package[[:space:]]*id.*" { send "com.blabansweets.app\r"; exp_continue }
+            -re "(?i)key.?store.*password.*" { send "$pass\r"; exp_continue }
+            -re "(?i)key password.*" { send "$pass\r"; exp_continue }
+            -re "(?i)full name.*" { send "BLABAN-SWEETS\r"; exp_continue }
+            -re "(?i)organizational unit.*" { send "Apps\r"; exp_continue }
+            -re "(?i)organization.*" { send "BLABAN-SWEETS\r"; exp_continue }
+            -re "(?i)country.*" { send "EG\r"; exp_continue }
+            -re "\\? .*" { send "\r"; exp_continue }
             eof
           }
           catch wait result
@@ -108,7 +106,7 @@ jobs:
           find . -maxdepth 3 -type f \\( -name '*.apk' -o -name '*.aab' \\) -print -exec cp {} ../test-artifacts/ \;
           test -n "$(find ../test-artifacts -maxdepth 1 -type f \\( -name '*.apk' -o -name '*.aab' \\) -print -quit)"
           (cd ../test-artifacts && sha256sum *.apk *.aab 2>/dev/null || true) > SHA256SUMS.txt
-          printf '%s\\n' 'TEST BUILD ONLY — signed with a temporary CI key; not suitable for Google Play release.' > ../test-artifacts/BUILD-NOT-FOR-RELEASE.txt
+          printf '%s\n' 'TEST BUILD ONLY — signed with a temporary CI key; not suitable for Google Play release.' > ../test-artifacts/BUILD-NOT-FOR-RELEASE.txt
 
       - name: Upload test APK/AAB (no keystore)
         uses: actions/upload-artifact@v5
