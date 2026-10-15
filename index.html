@@ -441,9 +441,7 @@ document.addEventListener("keydown",event=>{
 });
 
 let deferredInstallPrompt = null;
-window.addEventListener("beforeinstallprompt", (event) => {
-  event.preventDefault();
-  deferredInstallPrompt = event;
+function ensureInstallButton() {
   const actions = document.querySelector(".head-actions");
   if (!actions || document.getElementById("installAppBtn")) return;
   const button = document.createElement("button");
@@ -451,14 +449,26 @@ window.addEventListener("beforeinstallprompt", (event) => {
   button.type = "button";
   button.className = "btn pale";
   button.textContent = "تثبيت التطبيق";
+  button.setAttribute("aria-label", "تثبيت تطبيق BLABAN-SWEETS");
   button.addEventListener("click", async () => {
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    button.remove();
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      try { await deferredInstallPrompt.userChoice; } catch (_) {}
+      deferredInstallPrompt = null;
+      button.remove();
+      return;
+    }
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    alert(isIOS
+      ? "لتثبيت BLABAN-SWEETS على جهازك: افتحي قائمة المشاركة في Safari ثم اختاري «إضافة إلى الشاشة الرئيسية»."
+      : "لتثبيت BLABAN-SWEETS: افتحي قائمة المتصفح ⋮ ثم اختاري «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»، إذا ظهر الخيار.");
   });
   actions.prepend(button);
+}
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  ensureInstallButton();
 });
 window.addEventListener("appinstalled", () => {
   deferredInstallPrompt = null;
@@ -467,7 +477,10 @@ window.addEventListener("appinstalled", () => {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch(() => {});
+    ensureInstallButton();
   });
+} else {
+  window.addEventListener("load", ensureInstallButton);
 }
 
 showProducts();
