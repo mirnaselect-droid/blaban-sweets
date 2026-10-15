@@ -84,6 +84,8 @@ jobs:
             -re {(?i)organizational unit.*} { send "Apps\r"; exp_continue }
             -re {(?i)organization.*} { send "BLABAN-SWEETS\r"; exp_continue }
             -re {(?i)country.*} { send "EG\r"; exp_continue }
+            -re {(?i)maskable icon url.*} { send "https://raw.githubusercontent.com/mirnaselect-droid/blaban-sweets/android-twa-test-build/icons/blaban-icon-512.png\r"; exp_continue }
+            -re {(?i)icon url.*} { send "https://raw.githubusercontent.com/mirnaselect-droid/blaban-sweets/android-twa-test-build/icons/blaban-icon-512.png\r"; exp_continue }
             -re {\\? .*} { send "\r"; exp_continue }
             eof
           }
