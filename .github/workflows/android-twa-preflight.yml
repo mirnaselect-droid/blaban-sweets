@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   pwa-preflight:
-    name: Check public PWA readiness
+    name: Check isolated preview PWA readiness
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -34,21 +34,31 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Verify production manifest is reachable and has expected basics
+      - name: Verify isolated preview manifest is reachable and has expected basics
         shell: bash
         run: |
           node <<'NODE'
-          const url = 'https://blaban-sweets.pages.dev/manifest.webmanifest';
+          const url = 'https://android-twa-scaffold.blaban-sweets.pages.dev/manifest.webmanifest';
           const expectedName = 'BLABAN-SWEETS | حلو ب لبن';
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
           (async () => {
-            const response = await fetch(url, { redirect: 'follow' });
+            let response;
+            let lastError;
+            for (let attempt = 1; attempt <= 12; attempt++) {
+              try {
+                response = await fetch(url, { redirect: 'follow' });
+                console.log('Attempt', attempt, 'HTTP', response.status, 'content-type', response.headers.get('content-type'));
+                if (response.ok) break;
+              } catch (error) {
+                lastError = error;
+              }
+              await sleep(5000);
+            }
+            if (!response || !response.ok) throw new Error(`Preview manifest unavailable after retries: ${lastError || response?.status}`);
             console.log('Manifest URL after redirects:', response.url);
-            console.log('HTTP status:', response.status);
-            console.log('Content-Type:', response.headers.get('content-type'));
-            if (!response.ok) throw new Error(`Manifest request failed: HTTP ${response.status}`);
             const body = await response.text();
             if (!/json/i.test(response.headers.get('content-type') || '') && !body.trimStart().startsWith('{')) {
-              throw new Error('Manifest URL returned HTML or another non-JSON response; TWA build is blocked until the correct public manifest URL is confirmed.');
+              throw new Error('Preview manifest URL returned HTML or another non-JSON response.');
             }
             const manifest = JSON.parse(body);
             const errors = [];
@@ -64,16 +74,16 @@ jobs:
               console.error(errors.join('\n'));
               process.exit(1);
             }
-            console.log('Manifest reachable. Expected name, launch path, scope, RTL, standalone display, and icon sizes passed.');
+            console.log('Preview manifest basics passed. NOTE: this is a preview origin, not the final Play Store origin.');
           })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
-      - name: Run Bubblewrap PWA validation
+      - name: Run Bubblewrap PWA validation against isolated preview
         if: always()
         shell: bash
         run: |
           set +e
-          npx --yes @bubblewrap/cli validate --url=https://blaban-sweets.pages.dev 2>&1 | tee bubblewrap-validation.log
+          npx --yes @bubblewrap/cli validate --url=https://android-twa-scaffold.blaban-sweets.pages.dev 2>&1 | tee bubblewrap-validation.log
           status=${PIPESTATUS[0]}
           echo "Bubblewrap validation exit code: ${status}" | tee -a bubblewrap-validation.log
           exit "${status}"
