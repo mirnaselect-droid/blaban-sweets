@@ -75,21 +75,60 @@ jobs:
           cat > /tmp/init-bubblewrap.exp <<'EXPECT'
           set timeout 180
           set pass $env(TEST_KEY_PASSWORD)
+          set icon "https://raw.githubusercontent.com/mirnaselect-droid/blaban-sweets/android-twa-test-build/icons/blaban-icon-512.png"
           spawn npx --yes @bubblewrap/cli init --manifest=https://blaban-sweets.pages.dev/manifest.webmanifest --directory=android-twa
-          expect {
-            -nocase -re {Application ID:} { send "com.blabansweets.app\r"; exp_continue }
-            -re {(?i)key.?store.*password.*} { send "$pass\r"; exp_continue }
-            -re {(?i)key password.*} { send "$pass\r"; exp_continue }
-            -re {(?i)full name.*} { send "BLABAN-SWEETS\r"; exp_continue }
-            -re {(?i)organizational unit.*} { send "Apps\r"; exp_continue }
-            -re {(?i)organization.*} { send "BLABAN-SWEETS\r"; exp_continue }
-            -re {(?i)country.*} { send "EG\r"; exp_continue }
-            -nocase -re {Key name:} { send "android\r"; exp_continue }
-            -nocase -re {Maskable Icon URL:} { send "https://raw.githubusercontent.com/mirnaselect-droid/blaban-sweets/android-twa-test-build/icons/blaban-icon-512.png\r"; exp_continue }
-            -nocase -re {Icon URL:} { send "https://raw.githubusercontent.com/mirnaselect-droid/blaban-sweets/android-twa-test-build/icons/blaban-icon-512.png\r"; exp_continue }
-            -re {\\? .*} { send "\r"; exp_continue }
-            eof
-          }
+
+          # Answer each prompt in order. Do not use a catch-all matcher: Inquirer redraws
+          # old prompts in the terminal and broad matchers can send an answer to the wrong field.
+          expect -nocase -re {Domain:}
+          send "\r"
+          expect -nocase -re {URL path:}
+          send "\r"
+          expect -nocase -re {Application name:}
+          send "BLABAN-SWEETS\r"
+          expect -nocase -re {Short name:}
+          send "BLABAN\r"
+          expect -nocase -re {Application ID:}
+          send "com.blabansweets.app\r"
+          expect -nocase -re {Starting version code for the new app version:}
+          send "\r"
+          expect -nocase -re {Display mode:}
+          send "\r"
+          expect -nocase -re {Orientation:}
+          send "\r"
+          expect -nocase -re {Status bar color:}
+          send "\r"
+          expect -nocase -re {Splash screen color:}
+          send "\r"
+          expect -nocase -re {Icon URL:}
+          send "$icon\r"
+          expect -nocase -re {Maskable icon URL:}
+          send "$icon\r"
+          expect -nocase -re {Monochrome icon URL:}
+          send "\r"
+          expect -nocase -re {Include support for Play Billing\?}
+          send "\r"
+          expect -nocase -re {Request geolocation permission\?}
+          send "\r"
+          expect -nocase -re {Key store location:}
+          send "\r"
+          expect -nocase -re {Key name:}
+          send "android\r"
+          expect -nocase -re {Do you want to create one now\?}
+          send "\r"
+          expect -nocase -re {First and Last names}
+          send "BLABAN-SWEETS\r"
+          expect -nocase -re {Organizational Unit}
+          send "Apps\r"
+          expect -nocase -re {Organization}
+          send "BLABAN-SWEETS\r"
+          expect -nocase -re {Country \(2 letter code\)}
+          send "EG\r"
+          expect -nocase -re {Password for the Key Store:}
+          send "$pass\r"
+          expect -nocase -re {Password for the Key:}
+          send "$pass\r"
+          expect eof
           catch wait result
           exit [lindex $result 3]
           EXPECT
