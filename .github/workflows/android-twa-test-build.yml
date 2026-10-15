@@ -77,14 +77,14 @@ jobs:
           set pass $env(TEST_KEY_PASSWORD)
           spawn npx --yes @bubblewrap/cli init --manifest=https://blaban-sweets.pages.dev/manifest.webmanifest --directory=android-twa
           expect {
-            -re "(?i)package[[:space:]]*id.*" { send "com.blabansweets.app\r"; exp_continue }
-            -re "(?i)key.?store.*password.*" { send "$pass\r"; exp_continue }
-            -re "(?i)key password.*" { send "$pass\r"; exp_continue }
-            -re "(?i)full name.*" { send "BLABAN-SWEETS\r"; exp_continue }
-            -re "(?i)organizational unit.*" { send "Apps\r"; exp_continue }
-            -re "(?i)organization.*" { send "BLABAN-SWEETS\r"; exp_continue }
-            -re "(?i)country.*" { send "EG\r"; exp_continue }
-            -re "\\? .*" { send "\r"; exp_continue }
+            -re {(?i)package.*id.*} { send "com.blabansweets.app\r"; exp_continue }
+            -re {(?i)key.?store.*password.*} { send "$pass\r"; exp_continue }
+            -re {(?i)key password.*} { send "$pass\r"; exp_continue }
+            -re {(?i)full name.*} { send "BLABAN-SWEETS\r"; exp_continue }
+            -re {(?i)organizational unit.*} { send "Apps\r"; exp_continue }
+            -re {(?i)organization.*} { send "BLABAN-SWEETS\r"; exp_continue }
+            -re {(?i)country.*} { send "EG\r"; exp_continue }
+            -re {\\? .*} { send "\r"; exp_continue }
             eof
           }
           catch wait result
