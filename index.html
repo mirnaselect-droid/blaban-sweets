@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#153b74">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icons/blaban-icon.svg">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
  <meta name="google-site-verification" content="jSYA1EoFHLDIAUue3qkAmjle8t8wkJsBg6YDsC7N_vk" />
 <meta name="description" content="حلو ب لبن — مع حلو ب لبن / حلى أيامك">
 <title>حلو ب لبن | مع حلو ب لبن / حلى أيامك</title>
@@ -401,7 +406,9 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   const {data,error}=await client.rpc("create_store_order",{p_customer_name:document.getElementById("orderName").value.trim(),p_customer_phone:document.getElementById("orderPhone").value.trim(),p_delivery_address:document.getElementById("orderAddress").value.trim(),p_notes:("طريقة الدفع: "+(storePaymentMethods.find(x=>String(x.key||x.label)===document.getElementById("orderPaymentMethod").value)?.label||document.getElementById("orderPaymentMethod").value)+(()=>{const d=[];const sender=document.getElementById("paymentSender")?.value.trim();const wallet=document.getElementById("paymentWalletPhone")?.value.trim();const ref=document.getElementById("paymentReference")?.value.trim();if(sender)d.push("اسم حساب الدفع: "+sender);if(wallet)d.push("رقم المحفظة: "+wallet);if(ref)d.push("مرجع التحويل: "+ref);return d.length?" | "+d.join(" | "):""})()+(document.getElementById("orderNotes").value.trim()?" | ملاحظات: "+document.getElementById("orderNotes").value.trim():"")).slice(0,1000),p_items:[...orderCart.entries()].map(([id,quantity])=>({id,quantity})),p_delivery_zone_id:selectedZone.id,p_branch_id:document.getElementById("orderBranch").value||null});
   if(error)throw error;
   const summary=(data.items||[]).map(x=>x.name+" × "+x.quantity+" = "+money(x.subtotal)).join("\n");
-  const message="طلب جديد من حلو ب لبن "+data.order_number+"\n"+summary+"\nقيمة المنتجات: "+money(data.subtotal_amount)+"\nالتوصيل: "+money(data.delivery_fee)+"\nالإجمالي شامل التوصيل: "+money(data.total_amount)+"\nالاسم: "+document.getElementById("orderName").value.trim()+"\nالهاتف: "+document.getElementById("orderPhone").value.trim()+"\nالعنوان: "+document.getElementById("orderAddress").value.trim()+"\nملاحظات: "+(document.getElementById("orderNotes").value.trim()||"لا يوجد");
+  const paymentLabel=storePaymentMethods.find(x=>String(x.key||x.label)===document.getElementById("orderPaymentMethod").value)?.label||document.getElementById("orderPaymentMethod").value;
+  const paymentDetails=[document.getElementById("paymentSender")?.value.trim(),document.getElementById("paymentWalletPhone")?.value.trim(),document.getElementById("paymentReference")?.value.trim()].filter(Boolean).join(" | ")||"لا توجد تفاصيل إضافية";
+  const message="طلب جديد من حلو ب لبن "+data.order_number+"\n"+summary+"\nقيمة المنتجات: "+money(data.subtotal_amount)+"\nالتوصيل: "+money(data.delivery_fee)+"\nالإجمالي شامل التوصيل: "+money(data.total_amount)+"\nطريقة الدفع: "+paymentLabel+"\nتفاصيل الدفع: "+paymentDetails+"\nالاسم: "+document.getElementById("orderName").value.trim()+"\nالهاتف: "+document.getElementById("orderPhone").value.trim()+"\nالعنوان: "+document.getElementById("orderAddress").value.trim()+"\nملاحظات: "+(document.getElementById("orderNotes").value.trim()||"لا يوجد");
   statusEl.textContent="تم تسجيل طلبك بنجاح برقم "+data.order_number+". الإجمالي "+money(data.total_amount)+".";
   const whatsappNumber=storeWhatsappNumber;
   if(whatsappNumber){const link="https://wa.me/"+whatsappNumber+"?text="+encodeURIComponent(message);const a=document.createElement("a");a.href=link;a.target="_blank";a.rel="noopener";a.className="btn";a.style.marginTop="12px";a.textContent="إرسال تفاصيل الطلب عبر واتساب";statusEl.appendChild(document.createElement("br"));statusEl.appendChild(a)}
@@ -438,7 +445,113 @@ document.getElementById("checkout")?.addEventListener("click",event=>{
 document.addEventListener("keydown",event=>{
  if(event.key==="Escape"&&document.getElementById("checkout")?.classList.contains("checkout-modal-open"))closeCheckoutModal();
 });
+// Support direct app shortcuts such as /#checkout, not only in-page clicks.
+if (location.hash === "#checkout") openCheckoutModal();
+
+let deferredInstallPrompt = null;
+function ensureInstallButton() {
+  const actions = document.querySelector(".head-actions");
+  if (!actions || document.getElementById("installAppBtn")) return;
+  const button = document.createElement("button");
+  button.id = "installAppBtn";
+  button.type = "button";
+  button.className = "btn pale";
+  button.textContent = "تثبيت التطبيق";
+  button.setAttribute("aria-label", "تثبيت تطبيق BLABAN-SWEETS");
+  button.addEventListener("click", async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      try { await deferredInstallPrompt.userChoice; } catch (_) {}
+      deferredInstallPrompt = null;
+      button.remove();
+      return;
+    }
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    alert(isIOS
+      ? "لتثبيت BLABAN-SWEETS على جهازك: افتحي قائمة المشاركة في Safari ثم اختاري «إضافة إلى الشاشة الرئيسية»."
+      : "لتثبيت BLABAN-SWEETS: افتحي قائمة المتصفح ⋮ ثم اختاري «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»، إذا ظهر الخيار.");
+  });
+  actions.prepend(button);
+}
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  ensureInstallButton();
+});
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  document.getElementById("installAppBtn")?.remove();
+});
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    ensureInstallButton();
+  });
+} else {
+  window.addEventListener("load", ensureInstallButton);
+}
 
 showProducts();
 </script>
+
+<style>
+/* Native-app-like navigation for narrow screens; desktop storefront remains unchanged. */
+.app-bottom-nav{display:none}
+@media(max-width:700px){
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom, 0px))}
+  .app-bottom-nav{
+    position:fixed;inset:auto 0 0;z-index:70;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    background:#fffdf2f2;backdrop-filter:blur(18px);
+    border-top:1px solid #e8e8ef;
+    box-shadow:0 -8px 28px #153b7410
+  }
+  .app-bottom-nav a{
+    min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    color:#69758a;font-size:.72rem;font-weight:800;border-radius:12px;position:relative
+  }
+  .app-bottom-nav a .nav-icon{font-size:1.12rem;line-height:1.25}
+  .app-bottom-nav a.active{background:#eaf2ff;color:#153b74}
+  .app-bottom-nav .nav-cart-count{
+    position:absolute;top:1px;right:calc(50% - 24px);min-width:17px;height:17px;padding:0 4px;
+    border-radius:99px;background:#cf5684;color:white;font-size:.65rem;display:grid;place-items:center
+  }
+  body.checkout-lock .app-bottom-nav{display:none}
+}
+</style>
+<nav class="app-bottom-nav" aria-label="التنقل الرئيسي للتطبيق">
+  <a href="#home" class="active" data-app-nav><span class="nav-icon" aria-hidden="true">⌂</span><span>الرئيسية</span></a>
+  <a href="#categories" data-app-nav><span class="nav-icon" aria-hidden="true">☷</span><span>المنيو</span></a>
+  <a href="#checkout" data-app-nav><span class="nav-icon" aria-hidden="true">🛒</span><span>السلة</span><span class="nav-cart-count" id="appCartCount">0</span></a>
+  <a href="#contact" data-app-nav><span class="nav-icon" aria-hidden="true">♡</span><span>تواصل</span></a>
+</nav>
+<script>
+(() => {
+  const navLinks = [...document.querySelectorAll("[data-app-nav]")];
+  const targets = navLinks.map(link => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+  const setActive = (hash) => navLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === hash));
+  navLinks.forEach(link => link.addEventListener("click", () => setActive(link.getAttribute("href"))));
+  window.addEventListener("hashchange", () => setActive(location.hash || "#home"));
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => b.intersectionRatio-a.intersectionRatio)[0];
+      if (visible) {
+        const id = visible.target.id === "checkout" ? "#checkout" : visible.target.id === "categories" ? "#categories" : visible.target.id === "contact" ? "#contact" : "#home";
+        setActive(id);
+      }
+    }, {rootMargin:"-20% 0px -55% 0px",threshold:[0,.2,.5]});
+    targets.forEach(target => observer.observe(target));
+  }
+  const syncCartCount = () => {
+    const source = document.getElementById("cartCount");
+    const target = document.getElementById("appCartCount");
+    if (source && target) target.textContent = source.textContent.trim() || "0";
+  };
+  syncCartCount();
+  const count = document.getElementById("cartCount");
+  if (count && "MutationObserver" in window) new MutationObserver(syncCartCount).observe(count,{childList:true,characterData:true,subtree:true});
+})();
+</script>
+
 </body></html>
