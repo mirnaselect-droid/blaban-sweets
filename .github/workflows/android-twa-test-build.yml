@@ -99,7 +99,7 @@ jobs:
           log_file -a /tmp/bubblewrap-expect.log
           # Fail immediately on a prompt mismatch. Expect otherwise returns "timeout" and the
           # script would keep sending answers into the wrong prompts, corrupting the setup.
-          proc expect_prompt {pattern} {
+          proc expect_prompt {\\?\\s*pattern} {
             expect {
               -nocase -re $pattern {}
               timeout { puts stderr "ERROR: Timed out waiting for Bubblewrap prompt: $pattern"; exit 124 }
@@ -112,41 +112,41 @@ jobs:
 
           # Answer each prompt in order. Do not use a catch-all matcher: Inquirer redraws
           # old prompts in the terminal and broad matchers can send an answer to the wrong field.
-          expect_prompt {Domain:}
+          expect_prompt {\\?\\s*Domain:}
           send "blaban-sweets.pages.dev\r"
-          expect_prompt {URL path:}
+          expect_prompt {\\?\\s*URL path:}
           send "\r"
-          expect_prompt {Application name:}
+          expect_prompt {\\?\\s*Application name:}
           send "BLABAN-SWEETS\r"
-          expect_prompt {Short name:}
+          expect_prompt {\\?\\s*Short name:}
           send "BLABAN\r"
-          expect_prompt {Application ID:}
+          expect_prompt {\\?\\s*Application ID:}
           send "com.blabansweets.app\r"
-          expect_prompt {Starting version code for the new app version:}
+          expect_prompt {\\?\\s*Starting version code for the new app version:}
           send "\r"
-          expect_prompt {Display mode:}
+          expect_prompt {\\?\\s*Display mode:}
           send "\r"
-          expect_prompt {Orientation:}
+          expect_prompt {\\?\\s*Orientation:}
           send "\r"
-          expect_prompt {Status bar color:}
+          expect_prompt {\\?\\s*Status bar color:}
           send "\r"
-          expect_prompt {Splash screen color:}
+          expect_prompt {\\?\\s*Splash screen color:}
           send "\r"
-          expect_prompt {Icon URL:}
+          expect_prompt {\\?\\s*Icon URL:}
           send "$icon\r"
-          expect_prompt {Maskable icon URL:}
+          expect_prompt {\\?\\s*Maskable icon URL:}
           send "$icon\r"
-          expect_prompt {Include app shortcuts}
+          expect_prompt {\\?\\s*Include app shortcuts}
           send "\r"
-          expect_prompt {Monochrome icon URL:}
+          expect_prompt {\\?\\s*Monochrome icon URL:}
           send "\r"
-          expect_prompt {Include support for Play Billing}
+          expect_prompt {\\?\\s*Include support for Play Billing}
           send "\r"
-          expect_prompt {Request geolocation permission}
+          expect_prompt {\\?\\s*Request geolocation permission}
           send "\r"
-          expect_prompt {Key store location:}
+          expect_prompt {\\?\\s*Key store location:}
           send "\r"
-          expect_prompt {Key name:}
+          expect_prompt {\\?\\s*Key name:}
           send "android\r"
           expect eof
           catch wait result
