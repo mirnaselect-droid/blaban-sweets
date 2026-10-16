@@ -17,6 +17,7 @@ on:
       - "admin.html"
       - "_headers"
       - "ANDROID-PLAY-READINESS.md"
+      - "android/**"
       - ".github/workflows/pwa-validation.yml"
 
 permissions:
@@ -98,5 +99,20 @@ jobs:
           if (/(?:service[_-]?role[_-]?key|sb_secret_[A-Za-z0-9_-]{16,})/i.test(storefront + admin)) {
             throw new Error('Secret/service-role credentials must never be embedded in browser HTML');
           }
-          console.log('PWA assets, checkout RPC boundary, no client price submission, and admin separation validated.');
+          const twa = JSON.parse(fs.readFileSync('android/twa-manifest.json', 'utf8'));
+          for (const key of ['name', 'launcherName', 'packageId', 'host', 'startUrl', 'iconUrl', 'themeColor', 'themeColorDark', 'backgroundColor', 'signingKey']) {
+            if (twa[key] === undefined || twa[key] === null || twa[key] === '') {
+              throw new Error('Missing required draft TWA configuration field: ' + key);
+            }
+          }
+          if (twa.packageId !== 'com.blabansweets.app' || twa.host !== 'https://blaban-sweets.pages.dev' || twa.startUrl !== '/') {
+            throw new Error('TWA configuration must retain the approved package ID and production storefront origin');
+          }
+          if (!twa.signingKey.path.includes('REPLACE_WITH_SECURELY_STORED_KEYSTORE')) {
+            throw new Error('Draft TWA signing path must remain a clear placeholder until a secure keystore is created');
+          }
+          if (twa.fingerprints && twa.fingerprints.length) {
+            throw new Error('Do not add guessed signing fingerprints to the TWA configuration');
+          }
+          console.log('PWA assets, checkout RPC boundary, admin separation, and draft TWA configuration validated.');
           NODE
