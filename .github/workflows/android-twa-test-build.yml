@@ -1,4 +1,4 @@
-name: Android TWA test build (temporary signing key)
+name: Android WebView test build (alternative method)
 
 on:
   push:
@@ -12,24 +12,19 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-twa-test-build-prompt-match-v3
+  group: android-webview-test-build
   cancel-in-progress: true
 
 jobs:
-  test-build:
-    name: Build non-release TWA artifacts
+  build:
+    name: Build BLABAN-SWEETS Android APK (WebView)
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 25
     steps:
       - name: Check out isolated test branch
         uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '22'
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -38,140 +33,164 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create minimal Android WebView project
         shell: bash
         run: |
           set -euo pipefail
-          SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
-          test -d "$SDK_ROOT/cmdline-tools"
-          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)"
-          test -x "$SDKMANAGER"
-          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
-          SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
-          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
-          LICENSE_ACCEPTANCES="$(printf 'y\n%.0s' {1..100})"
-          "$SDKMANAGER" --licenses <<< "$LICENSE_ACCEPTANCES" >/dev/null
-          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;36.1.0"
-          if [ ! -e "$SDK_ROOT/bin" ]; then ln -s "$SDKMANAGER_DIR" "$SDK_ROOT/bin"; fi
-
-      - name: Install Bubblewrap and prompt automation
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y expect
-          npm install --global @bubblewrap/cli
-          mkdir -p "$HOME/.bubblewrap"
-          node -e 'const fs=require("node:fs"); fs.writeFileSync(process.env.HOME+"/.bubblewrap/config.json", JSON.stringify({jdkPath:process.env.JAVA_HOME,androidSdkPath:process.env.ANDROID_HOME},null,2)+"\n")'
-          bubblewrap --version
-          bubblewrap doctor
-
-      - name: Generate isolated TWA project with temporary test key
-        timeout-minutes: 8
-        shell: bash
-        run: |
-          set -euo pipefail
-          # A fresh, disposable signing key is generated for this CI run only.
-          TEST_KEY_PASSWORD="$(openssl rand -hex 16)"
-          export TEST_KEY_PASSWORD
-          mkdir -p android-twa
-          # Fail early if the production manifest or app icon cannot be fetched.
-          curl --fail --silent --show-error --location --max-time 30 https://blaban-sweets.pages.dev/manifest.webmanifest -o /tmp/blaban-manifest.webmanifest
-          node -e 'const m=JSON.parse(require("node:fs").readFileSync("/tmp/blaban-manifest.webmanifest","utf8")); if(!m.name||!m.start_url||!m.icons?.length) throw new Error("Production web manifest is missing required fields"); console.log("Manifest preflight passed:",m.name,m.start_url)' 
-          curl --fail --silent --show-error --location --max-time 30 https://blaban-sweets.pages.dev/icons/blaban-icon-512.png -o /tmp/blaban-icon-512.png
-          test -s /tmp/blaban-icon-512.png
-          # Serve the already-verified manifest locally to avoid a second external fetch inside Bubblewrap.
-          python3 -m http.server 8765 --directory /tmp >/tmp/blaban-manifest-server.log 2>&1 &
-          MANIFEST_SERVER_PID=$!
-          trap 'kill "$MANIFEST_SERVER_PID" 2>/dev/null || true' EXIT
-          for attempt in $(seq 1 20); do
-            if curl --fail --silent http://127.0.0.1:8765/blaban-manifest.webmanifest >/dev/null; then break; fi
-            sleep 1
-          done
-          curl --fail --silent http://127.0.0.1:8765/blaban-manifest.webmanifest >/dev/null
-          # Pre-create the disposable keystore at Bubblewrap's default path so init skips
-          # its fragile interactive certificate/keytool prompts entirely.
-          keytool -genkeypair -v -keystore android-twa/android-keystore -storepass "$TEST_KEY_PASSWORD" -alias android -keypass "$TEST_KEY_PASSWORD" -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=BLABAN-SWEETS, OU=Apps, O=BLABAN-SWEETS, C=EG" -storetype JKS
-          cat > /tmp/init-bubblewrap.exp <<'EXPECT'
-          set timeout 90
-          log_user 1
-          set env(TERM) xterm-256color
-          exp_internal 1
-          log_file -a /tmp/bubblewrap-expect.log
-          # Fail immediately on a prompt mismatch. Expect otherwise returns "timeout" and the
-          # script would keep sending answers into the wrong prompts, corrupting the setup.
-          proc expect_prompt {pattern} {
-            expect {
-              -nocase -re $pattern {}
-              timeout { puts stderr "ERROR: Timed out waiting for Bubblewrap prompt: $pattern"; exit 124 }
-              eof { puts stderr "ERROR: Bubblewrap exited before prompt: $pattern"; exit 125 }
-            }
+          mkdir -p app/src/main/java/com/blabansweets/app app/src/main/res/values
+          cat > settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories { google(); mavenCentral() }
           }
-          set pass $env(TEST_KEY_PASSWORD)
-          set icon "https://blaban-sweets.pages.dev/icons/blaban-icon-512.png"
-          spawn bubblewrap init --manifest=http://127.0.0.1:8765/blaban-manifest.webmanifest --directory=android-twa
+          rootProject.name = "BLABAN-SWEETS"
+          include(":app")
+          EOF
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+          }
+          EOF
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          EOF
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'com.blabansweets.app'
+              compileSdk 35
+              defaultConfig {
+                  applicationId 'com.blabansweets.app'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <application
+                  android:label="BLABAN-SWEETS"
+                  android:usesCleartextTraffic="false"
+                  android:theme="@style/AppTheme"
+                  android:hardwareAccelerated="true">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|keyboardHidden">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+              <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+                  <item name="android:fontFamily">sans</item>
+                  <item name="android:colorAccent">#7A284A</item>
+                  <item name="android:statusBarColor">#7A284A</item>
+                  <item name="android:navigationBarColor">#FFFFFF</item>
+                  <item name="android:windowLightNavigationBar">true</item>
+              </style>
+          </resources>
+          EOF
+          cat > app/src/main/java/com/blabansweets/app/MainActivity.java <<'EOF'
+          package com.blabansweets.app;
 
-          # Answer each prompt in order. Do not use a catch-all matcher: Inquirer redraws
-          # old prompts in the terminal and broad matchers can send an answer to the wrong field.
-          expect_prompt {\?[^\r\n]*Domain:}
-          send "blaban-sweets.pages.dev\r"
-          expect_prompt {\?[^\r\n]*URL path:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Application name:}
-          send "BLABAN-SWEETS\r"
-          expect_prompt {\?[^\r\n]*Short name:}
-          send "BLABAN\r"
-          expect_prompt {\?[^\r\n]*Application ID:}
-          send "com.blabansweets.app\r"
-          expect_prompt {\?[^\r\n]*Starting version code for the new app version:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Display mode:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Orientation:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Status bar color:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Splash screen color:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Icon URL:}
-          send "$icon\r"
-          expect_prompt {\?[^\r\n]*Maskable icon URL:}
-          send "$icon\r"
-          expect_prompt {\?[^\r\n]*Monochrome icon URL:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Include support for Play Billing}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Request geolocation permission}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Key store location:}
-          send "\r"
-          expect_prompt {\?[^\r\n]*Key name:}
-          send "android\r"
-          expect eof
-          catch wait result
-          exit [lindex $result 3]
-          EXPECT
-          expect -f /tmp/init-bubblewrap.exp || { cat /tmp/bubblewrap-expect.log 2>/dev/null || true; cat /tmp/blaban-manifest-server.log 2>/dev/null || true; exit 1; }
-          test -f android-twa/twa-manifest.json
-          node -e 'const m=require("./android-twa/twa-manifest.json"); if(m.packageId!=="com.blabansweets.app") throw new Error("Unexpected packageId: "+m.packageId); if(m.host!=="blaban-sweets.pages.dev") throw new Error("Unexpected TWA host: "+m.host); if(m.startUrl!=="/") throw new Error("Unexpected start URL: "+m.startUrl); console.log("TWA identity checks passed:",m.packageId,m.host,m.startUrl)'
-          echo "TEST_KEY_PASSWORD=$TEST_KEY_PASSWORD" >> "$GITHUB_ENV"
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.webkit.WebSettings;
+          import android.view.View;
+          import android.view.Window;
+          import android.view.WindowManager;
 
-      - name: Build APK and AAB for testing only
-        working-directory: android-twa
+          public class MainActivity extends Activity {
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  requestWindowFeature(Window.FEATURE_NO_TITLE);
+                  getWindow().setStatusBarColor(android.graphics.Color.rgb(122, 40, 74));
+                  webView = new WebView(this);
+                  webView.setBackgroundColor(android.graphics.Color.WHITE);
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setDatabaseEnabled(true);
+                  settings.setLoadsImagesAutomatically(true);
+                  settings.setJavaScriptCanOpenWindowsAutomatically(false);
+                  settings.setSupportMultipleWindows(false);
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.setWebChromeClient(new WebChromeClient());
+                  setContentView(webView);
+                  if (savedInstanceState != null) {
+                      webView.restoreState(savedInstanceState);
+                  } else {
+                      webView.loadUrl("https://blaban-sweets.pages.dev/");
+                  }
+              }
+
+              @Override
+              protected void onSaveInstanceState(Bundle outState) {
+                  super.onSaveInstanceState(outState);
+                  if (webView != null) webView.saveState(outState);
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) webView.goBack();
+                  else super.onBackPressed();
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (webView != null) {
+                      webView.destroy();
+                      webView = null;
+                  }
+                  super.onDestroy();
+              }
+          }
+          EOF
+          echo "Minimal Android project generated."
+
+      - name: Build debug APK
+        run: gradle --no-daemon --stacktrace assembleDebug
+
+      - name: Verify APK
+        shell: bash
         run: |
           set -euo pipefail
-          export BUBBLEWRAP_KEYSTORE_PASSWORD="$TEST_KEY_PASSWORD"
-          export BUBBLEWRAP_KEY_PASSWORD="$TEST_KEY_PASSWORD"
-          npx --yes @bubblewrap/cli build --skipPwaValidation
-          mkdir -p ../test-artifacts
-          find . -maxdepth 3 -type f \\( -name '*.apk' -o -name '*.aab' \\) -print -exec cp {} ../test-artifacts/ \;
-          test -n "$(find ../test-artifacts -maxdepth 1 -type f \\( -name '*.apk' -o -name '*.aab' \\) -print -quit)"
-          (cd ../test-artifacts && sha256sum *.apk *.aab 2>/dev/null || true) > SHA256SUMS.txt
-          printf '%s\n' 'TEST BUILD ONLY — signed with a temporary CI key; not suitable for Google Play release.' > ../test-artifacts/BUILD-NOT-FOR-RELEASE.txt
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          mkdir -p test-artifacts
+          cp "$APK" test-artifacts/BLABAN-SWEETS-test.apk
+          sha256sum test-artifacts/BLABAN-SWEETS-test.apk > test-artifacts/SHA256SUMS.txt
+          printf '%s\n' 'TEST BUILD ONLY — debug APK, not a Google Play release build.' > test-artifacts/BUILD-NOT-FOR-RELEASE.txt
+          ls -lh test-artifacts/
 
-      - name: Upload test APK/AAB (no keystore)
+      - name: Upload test APK
         uses: actions/upload-artifact@v5
         with:
-          name: blaban-sweets-android-test-build
+          name: blaban-sweets-android-test-apk
           path: test-artifacts/
           if-no-files-found: error
           retention-days: 7
