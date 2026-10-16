@@ -99,48 +99,54 @@ jobs:
           log_file -a /tmp/bubblewrap-expect.log
           # Fail immediately on a prompt mismatch. Expect otherwise returns "timeout" and the
           # script would keep sending answers into the wrong prompts, corrupting the setup.
-          expect_before timeout { puts stderr "ERROR: Timed out waiting for the expected Bubblewrap prompt; aborting safely."; exit 124 }
+          proc expect_prompt {pattern} {
+            expect {
+              -nocase -re $pattern {}
+              timeout { puts stderr "ERROR: Timed out waiting for Bubblewrap prompt: $pattern"; exit 124 }
+              eof { puts stderr "ERROR: Bubblewrap exited before prompt: $pattern"; exit 125 }
+            }
+          }
           set pass $env(TEST_KEY_PASSWORD)
           set icon "https://blaban-sweets.pages.dev/icons/blaban-icon-512.png"
           spawn bubblewrap init --manifest=http://127.0.0.1:8765/blaban-manifest.webmanifest --directory=android-twa
 
           # Answer each prompt in order. Do not use a catch-all matcher: Inquirer redraws
           # old prompts in the terminal and broad matchers can send an answer to the wrong field.
-          expect -nocase -re {Domain:}
+          expect_prompt {Domain:}
           send "blaban-sweets.pages.dev\r"
-          expect -nocase -re {URL path:}
+          expect_prompt {URL path:}
           send "\r"
-          expect -nocase -re {Application name:}
+          expect_prompt {Application name:}
           send "BLABAN-SWEETS\r"
-          expect -nocase -re {Short name:}
+          expect_prompt {Short name:}
           send "BLABAN\r"
-          expect -nocase -re {Application ID:}
+          expect_prompt {Application ID:}
           send "com.blabansweets.app\r"
-          expect -nocase -re {Starting version code for the new app version:}
+          expect_prompt {Starting version code for the new app version:}
           send "\r"
-          expect -nocase -re {Display mode:}
+          expect_prompt {Display mode:}
           send "\r"
-          expect -nocase -re {Orientation:}
+          expect_prompt {Orientation:}
           send "\r"
-          expect -nocase -re {Status bar color:}
+          expect_prompt {Status bar color:}
           send "\r"
-          expect -nocase -re {Splash screen color:}
+          expect_prompt {Splash screen color:}
           send "\r"
-          expect -nocase -re {Icon URL:}
+          expect_prompt {Icon URL:}
           send "$icon\r"
-          expect -nocase -re {Maskable icon URL:}
+          expect_prompt {Maskable icon URL:}
           send "$icon\r"
-          expect -nocase -re {Include app shortcuts}
+          expect_prompt {Include app shortcuts}
           send "\r"
-          expect -nocase -re {Monochrome icon URL:}
+          expect_prompt {Monochrome icon URL:}
           send "\r"
-          expect -nocase -re {Include support for Play Billing}
+          expect_prompt {Include support for Play Billing}
           send "\r"
-          expect -nocase -re {Request geolocation permission}
+          expect_prompt {Request geolocation permission}
           send "\r"
-          expect -nocase -re {Key store location:}
+          expect_prompt {Key store location:}
           send "\r"
-          expect -nocase -re {Key name:}
+          expect_prompt {Key name:}
           send "android\r"
           expect eof
           catch wait result
