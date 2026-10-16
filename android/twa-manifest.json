@@ -1,0 +1,28 @@
+{
+  "manifestVersion": 1,
+  "name": "BLABAN-SWEETS | حلو ب لبن",
+  "launcherName": "BLABAN-SWEETS",
+  "packageId": "com.blabansweets.app",
+  "host": "https://blaban-sweets.pages.dev",
+  "startUrl": "/",
+  "iconUrl": "https://blaban-sweets.pages.dev/icons/blaban-icon-512.png",
+  "maskableIconUrl": "https://blaban-sweets.pages.dev/icons/blaban-icon-512.png",
+  "themeColor": "#153b74",
+  "themeColorDark": "#153b74",
+  "navigationColor": "#153b74",
+  "navigationColorDark": "#153b74",
+  "backgroundColor": "#fffaf4",
+  "display": "standalone",
+  "orientation": "portrait",
+  "enableNotifications": false,
+  "enableSiteSettingsShortcut": false,
+  "fallbackType": "customtabs",
+  "splashScreenFadeOutDuration": 300,
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "signingKey": {
+    "path": "./keys/REPLACE_WITH_SECURELY_STORED_KEYSTORE.jks",
+    "alias": "blabansweets"
+  },
+  "webManifestUrl": "https://blaban-sweets.pages.dev/manifest.webmanifest"
+}
