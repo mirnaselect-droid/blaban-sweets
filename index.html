@@ -997,10 +997,10 @@ function renderStoreCategoryFilters(products){
 }
 if(storeCategoryFilters)storeCategoryFilters.addEventListener("click",event=>{const button=event.target.closest("[data-store-category]");if(!button)return;activeStoreCategory=button.dataset.storeCategory||"";renderStoreCategoryFilters(availableProducts.filter(p=>!p.parent_product_id));filterStoreProducts();});
 function filterStoreProducts(){
- const query=String(storeSearchInput?.value||"").trim().toLocaleLowerCase("ar");
+ const query=normalizeStoreSearchText(storeSearchInput?.value||"");
  const cards=[...document.querySelectorAll("#productsGrid .product-card")];
  let visible=0;
- cards.forEach(card=>{const matchesQuery=!query||card.textContent.toLocaleLowerCase("ar").includes(query);const matchesCategory=!activeStoreCategory||card.dataset.category===activeStoreCategory;const matches=matchesQuery&&matchesCategory;card.hidden=!matches;if(matches)visible++;});
+ cards.forEach(card=>{const cardText=normalizeStoreSearchText(card.textContent);const matchesQuery=!query||cardText.includes(query);const matchesCategory=!activeStoreCategory||card.dataset.category===activeStoreCategory;const matches=matchesQuery&&matchesCategory;card.hidden=!matches;if(matches)visible++;});
  if(storeSearchEmpty)storeSearchEmpty.hidden=!query||visible>0||cards.length===0;
  if(storeSearchClear)storeSearchClear.hidden=!query;
 }
