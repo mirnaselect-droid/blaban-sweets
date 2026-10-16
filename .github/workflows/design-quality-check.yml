@@ -135,12 +135,12 @@ jobs:
 
           for (const file of ['index.html', 'admin.html']) {
             const html = fs.readFileSync(file, 'utf8');
-            const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+            const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
             for (let i = 0; i < scripts.length; i++) {
               const attrs = scripts[i][1] || '';
               const source = scripts[i][2] || '';
               if (!source.trim()) continue;
-              const isModule = /\\btype\\s*=\\s*["']module["']/i.test(attrs);
+              const isModule = /\btype\s*=\s*["']module["']/i.test(attrs);
               const target = path.join(tempDir, `${path.basename(file)}-${i}.${isModule ? 'mjs' : 'js'}`);
               fs.writeFileSync(target, source);
               const result = spawnSync(process.execPath, ['--check', target], { encoding: 'utf8' });
