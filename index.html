@@ -1105,4 +1105,60 @@ if ("serviceWorker" in navigator) {
 })();
 </script>
 
+
+<!-- BLABAN-SWEETS modern page-flow enhancement: isolated on preview branch -->
+<style id="blaban-modern-flow">
+body.store-view-cart #home>section:not(#cart),
+body.store-view-checkout #home>section:not(#checkout),
+body.store-view-product #home>section:not(#categories),
+body.store-view-cart footer,body.store-view-checkout footer,body.store-view-product footer{display:none!important}
+body.store-view-cart #cart.cart-page-open,
+body.store-view-checkout #checkout.checkout-page-open{position:relative!important;inset:auto!important;display:block!important;width:min(1180px,calc(100% - 28px))!important;height:auto!important;max-height:none!important;overflow:visible!important;margin:24px auto!important;padding:0!important;background:transparent!important;backdrop-filter:none!important}
+body.store-view-cart #cart .cart-app,body.store-view-checkout #checkout .checkout-app{width:100%;max-width:100%;border-radius:26px;box-shadow:0 20px 55px #082d5017}
+body.store-view-cart #cart .cart-body{padding:clamp(18px,3vw,32px)}
+body.store-view-checkout #checkout .checkout-form-card{box-shadow:0 10px 34px #082d5010}
+body.store-view-product #categories{display:block!important}
+body.store-view-product #categories>.section-title,
+body.store-view-product #categories>.store-search-wrap,
+body.store-view-product #categories>#storeCategoryFilters,
+body.store-view-product #categories>#productsGrid,
+body.store-view-product #categories>#productsNotice{display:none!important}
+body.store-view-product #productDetailsModal.open{display:block!important}
+.product-card{transition:transform .22s ease,box-shadow .22s ease}
+.product-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px #0066c81b}
+.product-card .category-info p{line-height:1.65}
+#cart .cart-item{border-bottom:1px solid #e5eef6}
+#cart .cart-continue,#checkout #submitOrder{box-shadow:0 8px 20px #086bc922;transition:transform .18s,box-shadow .18s}
+#cart .cart-continue:hover,#checkout #submitOrder:hover{transform:translateY(-1px);box-shadow:0 12px 26px #086bc92b}
+@media(max-width:650px){
+ body.store-view-cart #cart.cart-page-open,body.store-view-checkout #checkout.checkout-page-open{width:calc(100% - 20px)!important;margin:12px auto!important}
+ body.store-view-cart #cart .cart-app,body.store-view-checkout #checkout .checkout-app{border-radius:20px}
+}
+@media(prefers-reduced-motion:reduce){.product-card,#cart .cart-continue,#checkout #submitOrder{transition:none!important}}
+</style>
+<script id="blaban-modern-page-flow">
+(()=> {
+ const body=document.body;
+ const cart=document.getElementById("cart"), checkout=document.getElementById("checkout"), detail=document.getElementById("productDetailsModal");
+ function clearViews(){body.classList.remove("store-view-cart","store-view-checkout","store-view-product");}
+ const originalOpenCart=window.openCartModal, originalCloseCart=window.closeCartModal, originalOpenCheckout=window.openCheckoutModal, originalCloseCheckout=window.closeCheckoutModal;
+ window.openCartModal=function(){if(typeof closeProductDetails==="function")closeProductDetails();if(checkout){checkout.classList.remove("checkout-page-open");checkout.setAttribute("aria-hidden","true")}clearViews();body.classList.add("store-view-cart");cart?.classList.add("cart-page-open");cart?.setAttribute("aria-hidden","false");if(typeof renderOrderCart==="function")renderOrderCart();window.scrollTo({top:0,behavior:"smooth"});};
+ window.closeCartModal=function(){cart?.classList.remove("cart-page-open");cart?.setAttribute("aria-hidden","true");clearViews();document.getElementById("categories")?.scrollIntoView({behavior:"smooth",block:"start"});};
+ window.openCheckoutModal=function(){if(!orderCart?.size){window.openCartModal();return;}cart?.classList.remove("cart-page-open");cart?.setAttribute("aria-hidden","true");clearViews();body.classList.add("store-view-checkout");checkout?.classList.add("checkout-page-open");checkout?.setAttribute("aria-hidden","false");if(typeof renderCheckoutOrderReview==="function")renderCheckoutOrderReview();window.scrollTo({top:0,behavior:"smooth"});};
+ window.closeCheckoutModal=function(){checkout?.classList.remove("checkout-page-open");checkout?.setAttribute("aria-hidden","true");clearViews();};
+ document.querySelectorAll('a[href="#cart"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();window.openCartModal();}));
+ document.querySelectorAll('a[href="#checkout"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();window.openCartModal();}));
+ document.querySelector("#cart .cart-close")?.addEventListener("click",()=>window.closeCartModal());
+ document.querySelector("#cart [data-back-to-products]")?.addEventListener("click",()=>window.closeCartModal());
+ document.getElementById("continueToCheckout")?.addEventListener("click",()=>{if(!window.orderCart?.size){document.getElementById("cartSummary")?.scrollIntoView({behavior:"smooth",block:"center"});return;}window.openCheckoutModal();});
+ document.getElementById("backToCart")?.addEventListener("click",()=>window.openCartModal());
+ document.querySelector("#checkout .checkout-close")?.addEventListener("click",()=>window.openCartModal());
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&body.classList.contains("store-view-checkout"))window.openCartModal();else if(e.key==="Escape"&&body.classList.contains("store-view-cart"))window.closeCartModal();});
+ // Keep the existing product detail renderer and catalog intact; show its detail view as a focused page.
+ const openDetails=window.openProductDetails;
+ if(typeof openDetails==="function")window.openProductDetails=function(id){clearViews();body.classList.add("store-view-product");openDetails(id);window.scrollTo({top:0,behavior:"smooth"});};
+ document.querySelectorAll("[data-detail-close]").forEach(b=>b.addEventListener("click",()=>{body.classList.remove("store-view-product");}));
+})();
+</script>
+
 </body></html>
