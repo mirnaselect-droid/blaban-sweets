@@ -136,8 +136,6 @@ jobs:
           send "$icon\r"
           expect_prompt {\?[^\r\n]*Maskable icon URL:}
           send "$icon\r"
-          expect_prompt {\?[^\r\n]*Include app shortcuts}
-          send "\r"
           expect_prompt {\?[^\r\n]*Monochrome icon URL:}
           send "\r"
           expect_prompt {\?[^\r\n]*Include support for Play Billing}
