@@ -683,16 +683,12 @@ if ("serviceWorker" in navigator) {
  const modal=document.getElementById("storeSearchModal");
  const dialog=modal?.querySelector(".store-search-dialog");
  const searchWrap=document.querySelector(".store-search-wrap");
- const actions=document.querySelector("header .head-actions");
+ const trigger=document.querySelector("header .store-search-trigger");
  const input=document.getElementById("storeSearchInput");
  const close=document.getElementById("storeSearchModalClose");
- if(!modal||!dialog||!searchWrap||!actions||!input||!close)return;
- const trigger=document.createElement("button");
- trigger.type="button";trigger.className="store-search-trigger";trigger.setAttribute("aria-label","فتح البحث عن المنتجات");
- trigger.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg><span>بحث</span>';
- actions.prepend(trigger);
+ if(!modal||!dialog||!searchWrap||!trigger||!input||!close)return;
  dialog.appendChild(searchWrap);
- function openSearch(){modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";window.setTimeout(()=>input.focus({preventScroll:true}),30);}
+ function openSearch(){modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";input.focus({preventScroll:true});}
  function closeSearch(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");document.body.style.overflow="";trigger.focus({preventScroll:true});}
  trigger.addEventListener("click",openSearch);close.addEventListener("click",closeSearch);
  modal.addEventListener("click",event=>{if(event.target===modal)closeSearch();});
