@@ -120,6 +120,46 @@ jobs:
           NODE
 
 
+      - name: Validate CSS braces and mobile viewport safeguards
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          let failed = false;
+          for (const file of ['index.html', 'admin.html']) {
+            const html = fs.readFileSync(file, 'utf8');
+            const styles = [...html.matchAll(/<style\\b[^>]*>([\\s\\S]*?)<\\/style>/gi)].map(match => match[1]);
+            if (!styles.length) {
+              console.error(`FAIL: ${file}: no embedded stylesheets found`);
+              failed = true;
+              continue;
+            }
+            for (let i = 0; i < styles.length; i++) {
+              const css = styles[i].replace(/\\/\\*[\\s\\S]*?\\*\\//g, '');
+              let depth = 0;
+              let minimum = 0;
+              for (const character of css) {
+                if (character === '{') depth++;
+                if (character === '}') depth--;
+                minimum = Math.min(minimum, depth);
+              }
+              if (depth !== 0 || minimum < 0) {
+                console.error(`FAIL: ${file} stylesheet #${i + 1}: unbalanced CSS braces (depth=${depth}, min=${minimum})`);
+                failed = true;
+              } else {
+                console.log(`PASS: ${file} stylesheet #${i + 1} CSS brace balance`);
+              }
+            }
+            if (!/<meta\\s+name=["']viewport["']/i.test(html)) {
+              console.error(`FAIL: ${file}: responsive viewport meta tag missing`);
+              failed = true;
+            } else {
+              console.log(`PASS: ${file} responsive viewport meta tag`);
+            }
+          }
+          if (failed) process.exit(1);
+          NODE
+
       - name: Parse inline JavaScript without executing storefront code
         shell: bash
         run: |
