@@ -128,14 +128,18 @@ jobs:
           let failed = false;
           for (const file of ['index.html', 'admin.html']) {
             const html = fs.readFileSync(file, 'utf8');
-            const styles = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(match => match[1]);
+            const styles = html.split('<style').slice(1).map(part => {
+              const openingEnd = part.indexOf('>');
+              const closingStart = part.indexOf('</style>');
+              return openingEnd >= 0 && closingStart > openingEnd ? part.slice(openingEnd + 1, closingStart) : '';
+            }).filter(Boolean);
             if (!styles.length) {
               console.error(`FAIL: ${file}: no embedded stylesheets found`);
               failed = true;
               continue;
             }
             for (let i = 0; i < styles.length; i++) {
-              const css = styles[i].replace(/\/\*[\s\S]*?\*\//g, '');
+              const css = styles[i].split('/*').map((part, index) => index === 0 ? part : part.split('*/').slice(1).join('*/')).join('');
               let depth = 0;
               let minimum = 0;
               for (const character of css) {
@@ -150,7 +154,7 @@ jobs:
                 console.log(`PASS: ${file} stylesheet #${i + 1} CSS brace balance`);
               }
             }
-            if (!/<meta\s+name=["']viewport["']/i.test(html)) {
+            if (!html.includes('name="viewport"')) {
               console.error(`FAIL: ${file}: responsive viewport meta tag missing`);
               failed = true;
             } else {
