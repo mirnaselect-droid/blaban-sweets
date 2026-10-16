@@ -53,6 +53,14 @@ jobs:
               continue;
             }
             const html = fs.readFileSync(file, 'utf8');
+            const staticMarkup = html.replace(/<script\\b[\\s\\S]*?<\\/script>/gi, '');
+            const ids = [...staticMarkup.matchAll(/\\bid=["']([^"']+)["']/gi)].map(match => match[1]);
+            const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+            if (duplicates.length) {
+              fail(`${file}: duplicate static HTML id(s): ${[...new Set(duplicates)].join(', ')}`);
+            } else {
+              pass(`${file}: static HTML ids are unique`);
+            }
             for (const [label, pattern] of [
               ['doctype', /^<!doctype html>/i],
               ['head opening', /<head\b/i],
