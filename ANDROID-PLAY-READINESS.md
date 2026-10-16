@@ -9,10 +9,11 @@
 
 ## Current state
 - The PWA manifest and service-worker foundation exist on branch `pwa-safe-main`.
+- A draft Bubblewrap/TWA configuration now exists at `android/twa-manifest.json`; automated checks validate its app ID, production origin, and placeholder signing path. It is configuration only, not a generated Android project or build artifact.
 - Android icon assets include 192px and 512px PNGs plus an SVG fallback.
 - GitHub Actions PWA asset validation passed for the current branch commit before this identity update.
 - The owner reports testing checkout/orders and the admin interface on the preview successfully.
-- This is not yet a signed Android App Bundle (AAB), and it is not ready to publish to Google Play.
+- This is not yet a generated Android project or signed Android App Bundle (AAB), and it is not ready to publish to Google Play.
 
 ## Deferred decisions
 - Monetization is intentionally postponed; do not add ads, ad SDKs, or monetization configuration until the owner explicitly reopens that topic.
@@ -20,7 +21,7 @@
 ## Safe release sequence
 1. Keep changes isolated on `pwa-safe-main` and verify the preview after each update; do not merge to `main` without explicit owner approval.
 2. Confirm the application ID is available/unused in the intended Play Console account before creating the release package.
-3. Build a Trusted Web Activity (TWA) wrapper for the production HTTPS origin if the storefront passes quality checks. Avoid a bare WebView wrapper that adds no meaningful value.
+3. Use the draft `android/twa-manifest.json` as the starting configuration, then generate the Trusted Web Activity (TWA) project with Bubblewrap for the production HTTPS origin if the storefront passes quality checks. Avoid a bare WebView wrapper that adds no meaningful value.
 4. Generate and securely store the Android signing key on a trusted device/build environment; never commit the private key or passwords to this repository.
 5. Add `/.well-known/assetlinks.json` only after the final application ID and signing certificate SHA-256 fingerprint are known. Do not guess the fingerprint.
 6. Test the signed AAB on physical Android devices and verify links, back navigation, checkout, connectivity failures, and that admin routes are not cached as public app content.
