@@ -118,3 +118,44 @@ jobs:
 
           if (process.exitCode) process.exit(process.exitCode);
           NODE
+
+
+      - name: Parse inline JavaScript without executing storefront code
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const os = require('node:os');
+          const path = require('node:path');
+          const { spawnSync } = require('node:child_process');
+
+          const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blaban-js-check-'));
+          let count = 0;
+          let failed = false;
+
+          for (const file of ['index.html', 'admin.html']) {
+            const html = fs.readFileSync(file, 'utf8');
+            const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+            for (let i = 0; i < scripts.length; i++) {
+              const attrs = scripts[i][1] || '';
+              const source = scripts[i][2] || '';
+              if (!source.trim()) continue;
+              const isModule = /\\btype\\s*=\\s*["']module["']/i.test(attrs);
+              const target = path.join(tempDir, `${path.basename(file)}-${i}.${isModule ? 'mjs' : 'js'}`);
+              fs.writeFileSync(target, source);
+              const result = spawnSync(process.execPath, ['--check', target], { encoding: 'utf8' });
+              if (result.status !== 0) {
+                failed = true;
+                console.error(`FAIL: JavaScript syntax in ${file} inline script #${i + 1}`);
+                console.error(result.stderr || result.stdout);
+              } else {
+                count++;
+                console.log(`PASS: ${file} inline script #${i + 1} syntax`);
+              }
+            }
+          }
+
+          fs.rmSync(tempDir, { recursive: true, force: true });
+          if (failed || count === 0) process.exit(1);
+          console.log(`Checked ${count} inline JavaScript block(s) without executing them.`);
+          NODE
