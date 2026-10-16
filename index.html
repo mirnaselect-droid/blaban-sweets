@@ -1150,7 +1150,7 @@ body.store-view-product #productDetailsModal.open{display:block!important}
  document.querySelectorAll('a[href="#checkout"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();window.openCartModal();}));
  document.querySelector("#cart .cart-close")?.addEventListener("click",()=>window.closeCartModal());
  document.querySelector("#cart [data-back-to-products]")?.addEventListener("click",()=>window.closeCartModal());
- document.getElementById("continueToCheckout")?.addEventListener("click",()=>{if(!window.orderCart?.size){document.getElementById("cartSummary")?.scrollIntoView({behavior:"smooth",block:"center"});return;}window.openCheckoutModal();});
+ document.getElementById("continueToCheckout")?.addEventListener("click",()=>{if(!orderCart.size){document.getElementById("cartSummary")?.scrollIntoView({behavior:"smooth",block:"center"});return;}window.openCheckoutModal();});
  document.getElementById("backToCart")?.addEventListener("click",()=>window.openCartModal());
  document.querySelector("#checkout .checkout-close")?.addEventListener("click",()=>window.openCartModal());
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&body.classList.contains("store-view-checkout"))window.openCartModal();else if(e.key==="Escape"&&body.classList.contains("store-view-cart"))window.closeCartModal();});
