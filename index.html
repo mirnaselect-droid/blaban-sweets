@@ -1735,7 +1735,7 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
   renderOrderCart?.();window.scrollTo({top:0,behavior:"auto"});
  }
  function openCheckoutPage(){
-  if(!window.orderCart||!orderCart.size){openCartPage();accountStatus("customerOrdersStatus","");const summary=$("cartSummary");if(summary)summary.textContent="السلة فاضية. اختاري منتجات الأول، وبعدها اضغطي متابعة لإدخال البيانات والدفع.";return}
+  if(typeof orderCart==="undefined"||!orderCart.size){openCartPage();const summary=$("cartSummary");if(summary)summary.textContent="السلة فاضية. اختاري منتجات الأول، وبعدها اضغطي متابعة لإدخال البيانات والدفع.";return}
   const cart=$("cart"),checkout=$("checkout");
   document.body.classList.remove("store-view-cart","cart-page-active","store-view-product","store-view-products");
   document.body.classList.add("store-view-checkout","checkout-page-active");
