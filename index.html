@@ -923,7 +923,8 @@ function renderPaymentDetails(){
    html+='<label style="display:block;font-weight:700;margin:8px 0 4px" for="paymentSender">اسم صاحب حساب إنستاباي <span style="color:#b42318">*</span></label><input id="paymentSender" required maxlength="100" autocomplete="name" placeholder="الاسم المسجل بالحساب" style="width:100%;padding:11px;border:1px solid #dce2ec;border-radius:10px;background:white">';
  }else if(card){
    html+='<p style="margin:0 0 10px;line-height:1.7">أكملي بيانات البطاقة فقط في صفحة دفع آمنة تابعة لمزوّد الدفع. لا تدخلي الرقم السري أو رمز الأمان أو OTP داخل المتجر.</p>';
-   if(storeVisaPaymentUrl&&/^https:\/\//i.test(storeVisaPaymentUrl))html+='<a class="btn" href="'+esc(storeVisaPaymentUrl)+'" target="_blank" rel="noopener noreferrer">الانتقال لصفحة الدفع الآمنة</a>';
+   const paymentUrl=method.payment_url||method.url||method.link||storeVisaPaymentUrl;
+   if(paymentUrl&&/^https:\/\//i.test(String(paymentUrl)))html+='<a class="btn" href="'+esc(paymentUrl)+'" target="_blank" rel="noopener noreferrer">الانتقال لصفحة الدفع الآمنة</a>';
    else html+='<p style="color:#9a5a00">يلزم إعداد رابط بوابة دفع آمنة قبل تحصيل البطاقة إلكترونيًا.</p>';
  }else if(wallet){
    html+='<label style="display:block;font-weight:700;margin:8px 0 4px" for="paymentWalletPhone">رقم المحفظة المستخدمة <span style="color:#b42318">*</span></label><input id="paymentWalletPhone" required inputmode="tel" maxlength="30" autocomplete="tel" placeholder="رقم الموبايل المرتبط بالمحفظة" style="width:100%;padding:11px;border:1px solid #dce2ec;border-radius:10px;background:white">';
