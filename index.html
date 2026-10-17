@@ -1721,8 +1721,14 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
  }
  function addSupportMessage(text,type){const host=$("storeSupportMessages"),div=document.createElement("div");div.className="support-message "+type;div.textContent=text;host.appendChild(div);host.scrollTop=host.scrollHeight}
  $("storeSupportForm").addEventListener("submit",async e=>{e.preventDefault();const input=$("storeSupportInput"),q=input.value.trim();if(!q)return;addSupportMessage(q,"user");input.value="";const submit=e.submitter;if(submit)submit.disabled=true;
-  // Do not expose any model API key in the browser. Until a secure AI provider key is configured, keep support guidance available.
-  setTimeout(()=>{addSupportMessage(guidedAnswer(q),"assistant");if(submit)submit.disabled=false},180);
+  try{
+   const c=client();if(!c)throw new Error("support service unavailable");
+   const {data,error}=await c.functions.invoke("ai-store-support",{body:{message:q}});
+   if(error)throw error;
+   if(data?.reply){addSupportMessage(data.reply,"assistant");if(submit)submit.disabled=false;return}
+   throw new Error("no AI response");
+  }catch(error){addSupportMessage(guidedAnswer(q),"assistant");}
+  finally{if(submit)submit.disabled=false}
  });
  const savedLanguage=localStorage.getItem("blaban-store-language");if(savedLanguage)applyStoreLanguage(savedLanguage);
  // One authoritative checkout transition: catch clicks before older listeners can interfere.
