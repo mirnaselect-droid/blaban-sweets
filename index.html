@@ -1836,7 +1836,7 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
 <button id="storeSupportLauncher" type="button" aria-label="فتح دعم العملاء الذكي" title="دعم العملاء"><svg class="support-headset-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 13v-2a9 9 0 0 1 18 0v2"/><rect x="3" y="12" width="4" height="7" rx="2"/><rect x="17" y="12" width="4" height="7" rx="2"/><path d="M17 19a5 5 0 0 1-5 3h-1"/></svg></button>
 <div id="storeSupportModal" class="store-support-modal" hidden role="dialog" aria-modal="true" aria-label="مساعد دعم المتجر">
  <div class="store-support-panel"><div class="store-support-head"><div><strong>مساعد حلو ب لبن</strong><small>مساعدة الطلبات والدفع والتوصيل</small></div><button class="store-support-close" id="storeSupportClose" type="button" aria-label="إغلاق">×</button></div>
- <div id="storeSupportMessages" aria-live="polite"><div class="support-message assistant">أهلًا بيك/بيكي/بيكم في حلو ب لبن 💙 إيه اللي أقدر أساعدكم فيه؟ اسألوني عن المينيو، إزاي تطلبوا أوردر أو تتابعوه، الدفع والتوصيل. ولو احتجتم مساعدة من شخص في خدمة العملاء، هحوّل المحادثة للفريق.</div></div>
+ <div id="storeSupportMessages" aria-live="polite"><div class="support-message assistant">أهلًا وسهلًا بيكم في حلو ب لبن 💙 إيه اللي أقدر أساعدكم فيه؟ اسألوني عن المينيو، إزاي تطلبوا أوردر أو تتابعوه، الدفع والتوصيل. ولو احتجتم مساعدة من شخص في خدمة العملاء، هحوّل المحادثة للفريق.</div></div>
  <form id="storeSupportForm" class="store-support-form"><input id="storeSupportInput" maxlength="1000" autocomplete="off" placeholder="اكتبي سؤالك هنا…" required><button type="submit">إرسال</button></form>
  </div>
 </div>
@@ -2059,7 +2059,7 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
    addSupportMessage(message.message,message.sender_type==="customer"?"user":message.sender_type==="admin"?"assistant":"assistant",message.id);
   }
   if(replace&&!(data||[]).length&&!host.children.length){
-   addSupportMessage("أهلًا بيك/بيكي/بيكم في حلو ب لبن 💙 إيه اللي أقدر أساعدكم فيه؟ اسألوني عن المينيو والطلبات والتوصيل والدفع.", "assistant");
+   addSupportMessage("أهلًا وسهلًا بيكم في حلو ب لبن 💙 إيه اللي أقدر أساعدكم فيه؟ اسألوني عن المينيو والطلبات والتوصيل والدفع.", "assistant");
   }
  }
  async function requestHumanSupport(reason){
@@ -2093,6 +2093,10 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
      const {data:conversation,error:conversationError}=await c.from("support_conversations").select("status").eq("id",conversationId).single();
      if(conversationError)throw conversationError;
      waitingForHuman=conversation.status==="waiting_human";
+     if(conversation.status==="resolved"){
+      const {error:reopenError}=await c.from("support_conversations").update({status:"open",updated_at:new Date().toISOString()}).eq("id",conversationId);
+      if(reopenError)throw reopenError;
+     }
      const savedCustomer=await saveSupportMessage("customer",q);
      if(savedCustomer?.id){customerBubble.dataset.messageId=savedCustomer.id;supportRenderedMessageIds.add(String(savedCustomer.id))}
     }catch(error){console.warn("Customer support message could not be saved",error)}
