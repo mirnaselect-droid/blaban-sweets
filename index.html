@@ -1203,4 +1203,22 @@ body.store-view-product #productDetailsModal.open{display:block!important}
 @media(max-width:380px){#productsGrid .blaban-menu-row{grid-template-columns:100px minmax(0,1fr)!important}.blaban-menu-row-copy{padding:10px}.blaban-menu-row-copy h3{font-size:.92rem}.blaban-menu-row-copy p{font-size:.77rem}}
 </style>
 
+
+<style id="blaban-standalone-pages-final">
+/* Final override must follow all legacy page-flow styles: cart and checkout are full-screen independent views. */
+body.store-view-cart #cart.cart-page-open,
+body.store-view-checkout #checkout.checkout-page-open,
+#cart.cart-page-open:not([aria-hidden="true"]),
+#checkout.checkout-page-open:not([aria-hidden="true"]){
+ display:block!important;position:fixed!important;inset:0!important;z-index:20000!important;
+ width:100%!important;height:100vh!important;height:100dvh!important;max-height:100vh!important;max-height:100dvh!important;
+ overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+ margin:0!important;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;
+ background:#f4faff!important;box-sizing:border-box!important;scroll-margin:0!important;
+}
+body.store-view-cart #cart .cart-app,body.store-view-checkout #checkout .checkout-app,
+#cart.cart-page-open .cart-app,#checkout.checkout-page-open .checkout-app{width:100%!important;max-width:1180px!important;margin:0 auto!important;border-radius:20px!important}
+body.store-view-cart,body.store-view-checkout{overflow:hidden!important}
+@media(max-width:600px){body.store-view-cart #cart.cart-page-open,body.store-view-checkout #checkout.checkout-page-open,#cart.cart-page-open:not([aria-hidden="true"]),#checkout.checkout-page-open:not([aria-hidden="true"]){padding:8px!important}}
+</style>
 </body></html>
