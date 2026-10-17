@@ -605,7 +605,7 @@ async function refreshAnalyticsOrders(){
 $("#refreshSales").addEventListener("click",refreshAnalyticsOrders);
 setInterval(()=>{if(!$("#view-sales")?.classList.contains("hidden"))refreshAnalyticsOrders();else if(salesPeriod==="day")renderSalesChart()},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!$("#view-sales")?.classList.contains("hidden"))refreshAnalyticsOrders()});
-document.querySelectorAll("[data-sales-period]").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.salesPeriod===salesPeriod));b.addEventListener("click",()=>{salesPeriod=b.dataset.salesPeriod;document.querySelectorAll("[data-sales-period]").forEach(x=>{const active=x===b;x.classList.toggle("active",active);x.setAttribute("aria-pressed",String(active))});renderSalesChart()})});
+
 
 // Compact status editor opened from the dashboard's latest-order rows.
 let activeStatusOrderId=null;
@@ -643,7 +643,7 @@ $("#orderStatusModalSave").addEventListener("click",async()=>{
  }catch(error){msg.textContent="تعذر حفظ الحالة: "+(error.message||"حاولي مرة أخرى");button.disabled=false;button.textContent="حفظ الحالة"}
 });
 
-$("#refreshSales").addEventListener("click",loadData);$("#refreshNewOrders").addEventListener("click",loadData);$("#refreshUsers").addEventListener("click",loadData);
+$("#refreshNewOrders").addEventListener("click",loadData);$("#refreshUsers").addEventListener("click",loadData);
 $("#newOrdersList").addEventListener("click",e=>{const b=e.target.closest("[data-open-order]");if(!b)return;navigate("orders");const id=b.dataset.openOrder;const select=[...document.querySelectorAll("[data-order-status]")].find(x=>x.dataset.orderStatus===id);if(select){select.scrollIntoView({behavior:"smooth",block:"center"});select.focus({preventScroll:true})}});
 function navigate(view){document.querySelectorAll(".view").forEach(el=>el.classList.add("hidden"));const target=$("#view-"+view);if(!target)return;target.classList.remove("hidden");document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("#pageTitle").textContent=({overview:"الرئيسية",sales:"المبيعات والطلبات","new-orders":"الطلبات الجديدة",products:"المنتجات",extras:"الإضافات والاكسترا",categories:"أقسام المتجر",orders:"كل الطلبات",users:"المستخدمون",branches:"إدارة الفروع",zones:"مناطق التوصيل",store:"تخصيص المتجر",settings:"إعدادات الربط"})[view]||view;if(view==="categories")loadStoreCategories();if(view==="store")loadStoreSettingsForm();if(view==="branches")loadBranches();if(view==="zones")loadZones();if(view==="sales")renderSalesChart();if(view==="new-orders")renderNewOrders();if(view==="users")renderUsers()}
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.view)));document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.goto)));$("#addProductTop").onclick=$("#addProductBtn").onclick=()=>{navigate("products");$("#productFormPanel").classList.remove("hidden");$("#productForm").reset();$("#productId").value="";$("#variantsList").innerHTML="";syncParentPriceField();$("#productFormTitle").textContent="إضافة منتج جديد"};
