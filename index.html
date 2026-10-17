@@ -1687,7 +1687,7 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
  const originalText=new Map();
  function setText(el,value){if(!el)return;if(!originalText.has(el))originalText.set(el,el.textContent);el.textContent=value}
  function applyStoreLanguage(lang){
-  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";account.style.direction=lang==="ar"?"rtl":"ltr";const drawer=document.getElementById("storeSideDrawer");if(drawer)drawer.style.direction=lang==="ar"?"rtl":"ltr";
   if(lang==="ar"){for(const [el,value] of originalText.entries())el.textContent=value;return}
   const dict=coreTranslations[lang];if(!dict)return;
   const links=[...document.querySelectorAll(".drawer-nav a span")];const keys=["home","products","cart","tracking","story","account","about","support"];
@@ -1734,8 +1734,10 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
  // One authoritative checkout transition: catch clicks before older listeners can interfere.
  function openCartPage(){
   const cart=$("cart"),checkout=$("checkout");
+  ["display","position","inset","z-index","width","height","max-height","overflow-y","margin","padding","background","box-sizing"].forEach(prop=>checkout?.style.removeProperty(prop));
   document.body.classList.remove("store-view-checkout","checkout-page-active","store-view-product","store-view-products");
   document.body.classList.add("store-view-cart","cart-page-active");
+  document.body.style.overflow="hidden";
   checkout?.classList.remove("checkout-page-open");checkout?.setAttribute("aria-hidden","true");
   cart?.classList.add("cart-page-open");cart?.setAttribute("aria-hidden","false");
   renderOrderCart?.();window.scrollTo({top:0,behavior:"auto"});
@@ -1772,8 +1774,8 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
   else if(target.id==="backToCart"||target.classList.contains("checkout-close"))openCartPage();
   else window.closeCartModal();
  },true);
- document.getElementById("checkoutForm")?.addEventListener("submit",()=>{document.body.style.overflow=""});
- window.blabanOpenCustomerAccount=openAccount;window.blabanOpenStoreSupport=openSupport;
+
+window.blabanOpenCustomerAccount=openAccount;window.blabanOpenStoreSupport=openSupport;
 })();
 </script>
 </body></html>
