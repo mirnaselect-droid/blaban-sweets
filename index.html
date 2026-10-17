@@ -912,14 +912,7 @@ function openCheckoutModal(){
 function closeCheckoutModal(){
  setStandaloneStoreView("menu");
 }
-document.querySelectorAll('a[href="#cart"]').forEach(link=>link.addEventListener("click",event=>{event.preventDefault();openCartModal();}));
-document.getElementById("continueToCheckout")?.addEventListener("click",()=>{if(!orderCart.size){const host=document.getElementById("cartSummary");host?.scrollIntoView({behavior:"smooth",block:"center"});return}closeCartModal();openCheckoutModal();renderCheckoutOrderReview();});
-document.getElementById("backToCart")?.addEventListener("click",()=>{closeCheckoutModal();openCartModal();});
-document.querySelector("#cart .cart-close")?.addEventListener("click",closeCartModal);document.querySelector("#cart [data-back-to-products]")?.addEventListener("click",closeCartModal);
-document.getElementById("cart")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeCartModal();});
-document.querySelectorAll('a[href="#checkout"]').forEach(link=>link.addEventListener("click",event=>{event.preventDefault();openCartModal();}));
-document.querySelector("#checkout .checkout-close")?.addEventListener("click",()=>{closeCheckoutModal();openCartModal();});
-document.addEventListener("keydown",event=>{if(event.key==="Escape"&&document.getElementById("checkout")?.classList.contains("checkout-page-open")){closeCheckoutModal();openCartModal();return}if(event.key==="Escape"&&document.getElementById("cart")?.classList.contains("cart-page-open"))closeCartModal();});
+/* Cart/checkout click handlers are registered once by blaban-modern-page-flow below. */
 
 
 /* Customer storefront authentication uses a separate storage key from admin.html. */
