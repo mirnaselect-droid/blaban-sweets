@@ -1023,7 +1023,7 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   const whatsappNumber=storeWhatsappNumber;
   if(whatsappNumber){const link="https://wa.me/"+whatsappNumber+"?text="+encodeURIComponent(message);const a=document.createElement("a");a.href=link;a.target="_blank";a.rel="noopener";a.className="btn";a.style.marginTop="12px";a.textContent="إرسال تفاصيل الطلب عبر واتساب";statusEl.appendChild(document.createElement("br"));statusEl.appendChild(a)}
   else {const note=document.createElement("p");note.textContent="الطلب اتسجل في لوحة الإدارة. هنفعّل إرسال تفاصيله على واتساب بعد إضافة رقم واتساب الرسمي للمتجر.";statusEl.appendChild(note)}
-  orderCart.clear();cartExtras.clear();localStorage.removeItem("blaban-cart-extras-v1");renderOrderCart();document.getElementById("checkoutForm").reset();
+  orderCart.clear();cartExtras.clear();localStorage.removeItem("blaban-cart-extras-v1");renderOrderCart();document.getElementById("checkoutForm").reset();renderPaymentChoices();
  }catch(err){statusEl.textContent="تعذر تسجيل الطلب: "+(err.message||"حاولي مرة أخرى");}
  finally{btn.disabled=false}
 });
