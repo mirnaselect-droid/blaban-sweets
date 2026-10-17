@@ -28,7 +28,7 @@ with check (
   )
 );
 
-drop policy if exists "Admins can reply in support conversations" on public.support_conversations;
+drop policy if exists "Admins can reply in support conversations" on public.support_messages;
 create policy "Admins can reply in support conversations"
 on public.support_messages for insert to authenticated
 with check (
@@ -37,7 +37,7 @@ with check (
   and exists (select 1 from public.support_conversations c where c.id = conversation_id)
 );
 
-drop policy if exists "Customers can view messages in own support conversations" on public.support_conversations;
+drop policy if exists "Customers can view messages in own support conversations" on public.support_messages;
 create policy "Customers can view messages in own support conversations"
 on public.support_messages for select to authenticated
 using (
