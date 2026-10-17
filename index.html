@@ -368,6 +368,32 @@ header .brand.brand-center{height:auto!important;min-height:0!important}
  .hero-slogan-media img{width:64px;height:64px;flex-basis:64px}
 }
 </style>
+<style id="account-drawer-fixes">
+.store-drawer{background:var(--cream,#fff8f2)!important;box-shadow:-12px 0 34px #142b4920!important;border-left:1px solid #e8d8cf!important}
+.store-drawer .drawer-head{border-bottom:1px solid #e8d8cf!important;color:var(--navy,#17345a)!important}
+.store-drawer .nav.drawer-nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px 12px!important;align-items:start!important;padding:18px 0 24px!important}
+.store-drawer .nav.drawer-nav a,.store-drawer[data-menu-shape="circle"] .nav.drawer-nav a{width:100%!important;height:auto!important;min-height:0!important;max-width:none!important;align-self:stretch!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;gap:9px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--navy,#17345a)!important;text-align:center!important;font-size:.95rem!important}
+.store-drawer .nav.drawer-nav a:hover,.store-drawer .nav.drawer-nav a:focus-visible{background:transparent!important;outline:none!important}
+.store-drawer .nav.drawer-nav a .drawer-icon{display:grid;place-items:center;width:76px;height:76px;max-width:100%;margin:auto;border-radius:50%;background:#f5e5dc;color:#9b4b3b;font-size:1.8rem;box-shadow:0 3px 10px #142b4910;transition:transform .18s,background .18s}
+.store-drawer .nav.drawer-nav a:hover .drawer-icon{transform:translateY(-2px);background:#ecd0c2}
+.store-drawer .nav.drawer-nav a span:last-child{display:block;line-height:1.4;font-weight:800}
+.account-page{min-height:65vh;padding:28px 16px 56px;background:var(--cream,#fff8f2);direction:rtl}
+.account-page-inner{max-width:850px;margin:0 auto}
+.account-page h2{font-size:clamp(1.6rem,4vw,2.2rem);margin:8px 0 22px;color:var(--navy,#17345a)}
+.account-back,.account-action{border:0;border-radius:999px;padding:10px 16px;background:#f1dfd5;color:#713c31;font-weight:800;cursor:pointer}
+.account-info-card,.account-setting-card{background:transparent;border:1px solid #e8d8cf;border-radius:18px;padding:18px;margin:12px 0}
+.account-info-card h3{margin:14px 0 6px;color:var(--navy,#17345a)}
+.account-info-card p,.account-note{line-height:1.8}
+.account-setting-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.account-setting-card{display:flex;flex-direction:column;gap:8px;text-align:right;cursor:pointer;color:var(--navy,#17345a);font-weight:800}
+.account-setting-card small{font-weight:400;color:var(--muted,#6b7280);line-height:1.6}
+.account-form{display:grid;gap:12px}
+.account-form label{display:grid;gap:6px;font-weight:700}
+.account-form input,.account-form select,.account-form textarea{width:100%;box-sizing:border-box;border:1px solid #ddcfc7;border-radius:12px;padding:12px;background:transparent;color:inherit;font:inherit}
+.account-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.account-note{font-size:.9rem;color:var(--muted,#6b7280)}
+@media(max-width:400px){.store-drawer .nav.drawer-nav a .drawer-icon{width:66px;height:66px}}
+</style>
 </head>
 <body>
 <header><div class="wrap top">
@@ -375,7 +401,7 @@ header .brand.brand-center{height:auto!important;min-height:0!important}
 <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
 <aside class="store-drawer" id="storeSideDrawer" aria-hidden="true" aria-label="قائمة المتجر">
   <div class="drawer-head"><strong>القائمة</strong><button class="drawer-close" id="drawerClose" type="button" aria-label="إغلاق القائمة">×</button></div>
-  <nav class="nav nav-start drawer-nav"><a href="#home">الرئيسية</a><a href="#categories">المنتجات</a><a href="#checkout">المشتريات</a><a href="#story">من نحن</a></nav>
+  <nav class="nav nav-start drawer-nav" data-menu-shape="circle"><a href="#home"><span class="drawer-icon">⌂</span><span>الرئيسية</span></a><a href="#categories"><span class="drawer-icon">✿</span><span>المنتجات</span></a><a href="#checkout"><span class="drawer-icon">🛒</span><span>المشتريات</span></a><a href="#account"><span class="drawer-icon">♙</span><span>حسابك</span></a><a href="#about-app"><span class="drawer-icon">♡</span><span>حول التطبيق</span></a><a href="#story"><span class="drawer-icon">✦</span><span>من نحن</span></a></nav>
 </aside>
 <a class="brand brand-center" href="#home" aria-label="BLABAN-SWEETS الرئيسية"><img id="storeLogo" class="logo" src="" alt="لوجو حلو ب لبن" style="object-fit:contain;display:none;background:white"><span id="logoFallback" class="logo">حلو ب لبن</span><span class="brand-copy"><span id="storeNameAr">حلو ب لبن</span><small id="storeTagline">مع حلو ب لبن / حلى أيامك</small><small id="storeNameEn">BLABAN-SWEETS</small></span></a>
 <div class="head-actions"><a class="head-icon" href="#checkout" aria-label="السلة والمشتريات">🛒<span class="cart-count" id="cartCount">0</span></a><a class="head-icon" href="#contact" aria-label="تواصل معنا">♧</a><a class="head-icon" href="#categories" aria-label="المنتجات">⌕</a></div>
@@ -417,6 +443,8 @@ header .brand.brand-center{height:auto!important;min-height:0!important}
 <article class="contact-card whatsapp-card"><span class="contact-symbol">◉</span><h3>تواصل معانا</h3><p>اتواصلي معانا بالطريقة المناسبة ليكي.</p><div id="contactNumbers" class="contact-empty">سيتم إضافة أرقام التواصل هنا</div></article>
 <article class="contact-card socials-card"><h3>تابعينا على صفحاتنا</h3><p>فيسبوك · واتساب · تيك توك</p><div class="social-links" id="socialLinks"><span aria-label="فيسبوك">f</span><span aria-label="واتساب">◉</span><span aria-label="تيك توك">♪</span></div><small id="socialLinksHint">روابط الصفحات هتظهر بعد إضافتها.</small></article>
 </section>
+<section id="accountPage" class="account-page" hidden aria-live="polite"><div class="account-page-inner"><button type="button" class="account-back" data-account-back>← رجوع للمتجر</button><p class="eyebrow">حلو ب لبن</p><h2 id="accountPageTitle">حسابك</h2><div id="accountPageContent"></div></div></section>
+<section id="aboutAppPage" class="account-page" hidden aria-live="polite"><div class="account-page-inner"><button type="button" class="account-back" data-store-home>← رجوع للمتجر</button><p class="eyebrow">BLABAN-SWEETS</p><h2>حول التطبيق</h2><p>حلو ب لبن، مكانك لاكتشاف الحلويات والمشروبات وطلبها بسهولة.</p><div class="account-info-card"><h3>إزاي تستخدمي المتجر؟</h3><p>اختاري المنتج والصنف المناسب، أضيفيه للسلة، وبعدها راجعي الكميات ورسوم التوصيل واملئي بيانات الطلب قبل التأكيد.</p><h3>محتاجه مساعدة؟</h3><p>استخدمي قسم الدعم داخل المتجر لو متاح، أو تواصلي مع فريق المتجر من وسائل التواصل المعروضة.</p><p class="account-note">حالة الطلبات وبيانات الحساب لا تُعرض إلا عند ربطها بحساب العميل بشكل آمن.</p></div></div></section>
 </main>
 <footer><div class="footer-wave"></div><div class="wrap foot"><div class="foot-brand-wrap"><img id="footerLogo" class="footer-logo" alt="لوجو أسفل المتجر" style="display:none"><div><div class="foot-brand" id="footerBrand">حلو ب لبن ✦</div><div id="footerTagline">مع حلو ب لبن / حلى أيامك</div></div></div><div class="foot-links"><a href="#home">الرئيسية</a><a href="#categories">المنتجات</a><a href="#checkout">المشتريات</a><a href="#contact">تواصل معانا</a></div><small>© <span id="year"></span> BLABAN-SWEETS — جميع الحقوق محفوظة</small></div><div class="footer-slogan">♥ من دنيا حلوة ♥</div></footer>
 <div id="productDetailsModal" class="product-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="detailProductTitle"><div class="product-modal-panel"><button type="button" class="detail-close" data-detail-close aria-label="إغلاق">×</button><div class="detail-layout"><div class="detail-main-image"><img id="detailProductImage" src="" alt=""></div><div class="detail-content"><span class="eyebrow">تفاصيل المنتج</span><h2 id="detailProductTitle"></h2><p id="detailProductDescription"></p><h3 id="detailVariantsHeading">اختاري الصنف</h3><div id="detailVariantList"></div><div class="detail-selected"><div><small>اختيارك</small><strong id="detailSelectedName"></strong><b id="detailSelectedPrice"></b></div><div class="detail-quantity"><button type="button" data-detail-qty="-1" aria-label="تقليل الكمية">−</button><strong id="detailQty">1</strong><button type="button" data-detail-qty="1" aria-label="زيادة الكمية">+</button></div></div><button type="button" id="detailAddToCart" class="btn" style="width:100%;margin-top:16px">إضافة إلى السلة +</button></div></div></div></div>
@@ -486,11 +514,14 @@ function renderBranchOptions(){
  select.innerHTML='<option value="">بدون تحديد فرع</option>'+storeBranches.map(b=>'<option value="'+esc(b.id)+'">'+esc([b.name,b.city,b.area].filter(Boolean).join(" - "))+'</option>').join("");
 }
 
-async function showProducts(){try{const {createClient}=await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);await loadStoreSettings(sb);await loadDeliveryOptions(sb);const {data,error}=await sb.from("products").select("*").eq("is_available",true).order("created_at",{ascending:false});if(error)throw error;availableProducts=data||[];const mainProducts=availableProducts.filter(p=>!p.parent_product_id);if(!mainProducts.length){grid.innerHTML='<div class="empty">لسه مفيش منتجات مضافة للمنيو. هنضيف الأصناف والأسعار المعتمدة قريبًا.</div>';return}grid.innerHTML=mainProducts.map(p=>{const variants=availableProducts.filter(v=>String(v.parent_product_id)===String(p.id));const chosen=variants[0]||p;const minPrice=Math.min(...(variants.length?variants:[p]).map(v=>Number(v.price)||0));return '<article class="category product-card" role="button" tabindex="0" data-open-product="'+esc(p.id)+'"><div class="category-img"><img loading="lazy" src="'+esc(chosen.image_url||p.image_url||"https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=700&q=80")+'" alt="'+esc(p.name)+'"></div><div class="category-info"><h3>'+esc(p.name)+'</h3>'+(p.description?'<p>'+esc(p.description)+'</p>':'')+'<span class="product-price">'+(variants.length?'يبدأ من ':'')+money(minPrice)+'</span><button type="button" class="btn" data-open-product="'+esc(p.id)+'" style="width:100%;margin-top:12px">عرض التفاصيل والأصناف ←</button></div></article>'}).join("");if(typeof filterStoreProducts==="function")filterStoreProducts();}catch(e){grid.innerHTML='<div class="empty">مش قادرين نحمل المنيو دلوقتي. حاولي تحديث الصفحة بعد شوية.</div>';console.error(e)}}
+async function showProducts(){try{const {createClient}=await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);await loadStoreSettings(sb);await loadDeliveryOptions(sb);const {data,error}=await sb.from("products").select("*").eq("is_available",true).order("created_at",{ascending:false});if(error)throw error;availableProducts=data||[];for(const id of [...orderCart.keys()])if(!availableProducts.some(p=>String(p.id)===String(id)))orderCart.delete(id);renderOrderCart();const mainProducts=availableProducts.filter(p=>!p.parent_product_id);if(!mainProducts.length){grid.innerHTML='<div class="empty">لسه مفيش منتجات مضافة للمنيو. هنضيف الأصناف والأسعار المعتمدة قريبًا.</div>';return}grid.innerHTML=mainProducts.map(p=>{const variants=availableProducts.filter(v=>String(v.parent_product_id)===String(p.id));const chosen=variants[0]||p;const minPrice=Math.min(...(variants.length?variants:[p]).map(v=>Number(v.price)||0));return '<article class="category product-card" role="button" tabindex="0" data-open-product="'+esc(p.id)+'"><div class="category-img"><img loading="lazy" src="'+esc(chosen.image_url||p.image_url||"https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=700&q=80")+'" alt="'+esc(p.name)+'"></div><div class="category-info"><h3>'+esc(p.name)+'</h3>'+(p.description?'<p>'+esc(p.description)+'</p>':'')+'<span class="product-price">'+(variants.length?'يبدأ من ':'')+money(minPrice)+'</span><button type="button" class="btn" data-open-product="'+esc(p.id)+'" style="width:100%;margin-top:12px">عرض التفاصيل والأصناف ←</button></div></article>'}).join("");if(typeof filterStoreProducts==="function")filterStoreProducts();}catch(e){grid.innerHTML='<div class="empty">مش قادرين نحمل المنيو دلوقتي. حاولي تحديث الصفحة بعد شوية.</div>';console.error(e)}}
 
 const orderCart=new Map();
 let availableProducts=[];
+try{const savedCart=JSON.parse(localStorage.getItem("blaban_cart_v1")||"[]");if(Array.isArray(savedCart))savedCart.forEach(([id,q])=>{const qty=Math.max(1,Math.min(20,Number(q)||1));if(id!=null)orderCart.set(String(id),qty);});}catch(e){console.warn("تعذر استعادة السلة المحفوظة",e)}
+function persistOrderCart(){try{localStorage.setItem("blaban_cart_v1",JSON.stringify([...orderCart.entries()]));}catch(e){console.warn("تعذر حفظ السلة",e)}}
 function renderOrderCart(){
+ persistOrderCart();
  const count=[...orderCart.values()].reduce((a,b)=>a+b,0);const badge=document.getElementById("cartCount");if(badge)badge.textContent=count;
  const el=document.getElementById("cartSummary");
  if(!orderCart.size){el.className="empty";el.textContent="اختاري منتجًا من المنيو لإضافته لطلبك.";return}
@@ -565,7 +596,7 @@ document.getElementById("checkoutForm").addEventListener("submit",async e=>{
   const whatsappNumber=storeWhatsappNumber;
   if(whatsappNumber){const link="https://wa.me/"+whatsappNumber+"?text="+encodeURIComponent(message);const a=document.createElement("a");a.href=link;a.target="_blank";a.rel="noopener";a.className="btn";a.style.marginTop="12px";a.textContent="إرسال تفاصيل الطلب عبر واتساب";statusEl.appendChild(document.createElement("br"));statusEl.appendChild(a)}
   else {const note=document.createElement("p");note.textContent="الطلب اتسجل في لوحة الإدارة. هنفعّل إرسال تفاصيله على واتساب بعد إضافة رقم واتساب الرسمي للمتجر.";statusEl.appendChild(note)}
-  orderCart.clear();renderOrderCart();document.getElementById("checkoutForm").reset();
+  orderCart.clear();persistOrderCart();renderOrderCart();document.getElementById("checkoutForm").reset();
  }catch(err){statusEl.textContent="تعذر تسجيل الطلب: "+(err.message||"حاولي مرة أخرى");}
  finally{btn.disabled=false}
 });
@@ -654,5 +685,64 @@ if ("serviceWorker" in navigator) {
  drawer.querySelectorAll("a").forEach(link=>link.addEventListener("click",()=>closeDrawer(false)));
  document.addEventListener("keydown",event=>{if(event.key==="Escape"&&drawer.classList.contains("open"))closeDrawer()});
 })();
+
+// Account/about pages and navigation for the customer drawer.
+(()=> {
+ const home=document.getElementById("home"), account=document.getElementById("accountPage"), about=document.getElementById("aboutAppPage");
+ const title=document.getElementById("accountPageTitle"), content=document.getElementById("accountPageContent");
+ if(!home||!account||!about||!content)return;
+ let accountView="home";
+ const read=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key));return v??fallback}catch{return fallback}};
+ const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
+ const escHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ function showRoute(route){
+  const isAccount=route==="account",isAbout=route==="about";
+  [...home.children].forEach(el=>{if(el!==account&&el!==about)el.hidden=isAccount||isAbout;});
+  account.hidden=!isAccount;about.hidden=!isAbout;
+  if(isAccount){accountView="home";renderAccount();}
+  window.scrollTo({top:0,behavior:"smooth"});
+ }
+ function renderAccount(){
+  const profile=read("blaban_customer_profile",{name:"",email:"",phone:"",country:""}),addresses=read("blaban_customer_addresses",[]);
+  if(accountView==="home"){
+   title.textContent="حسابك";
+   content.innerHTML='<div class="account-setting-grid"><button class="account-setting-card" data-account-view="orders"><span>📦 الطلبات السابقة</span><small>متابعة سجل طلباتك</small></button><button class="account-setting-card" data-account-view="settings"><span>⚙️ الإعدادات</span><small>معلومات الحساب والعناوين والإشعارات واللغة والدولة</small></button><button class="account-setting-card" data-account-view="about"><span>♡ حول التطبيق</span><small>معلومات عن المتجر وطريقة الاستخدام</small></button></div>';
+  }else if(accountView==="settings"){
+   title.textContent="الإعدادات";
+   content.innerHTML='<div class="account-setting-grid"><button class="account-setting-card" data-account-view="profile"><span>👤 معلومات الحساب</span><small>الاسم والبريد الإلكتروني ورقم الهاتف</small></button><button class="account-setting-card" data-account-view="addresses"><span>📍 عناوين التوصيل</span><small>إضافة وحفظ أكثر من عنوان على هذا الجهاز</small></button><button class="account-setting-card" data-account-view="notifications"><span>🔔 الإشعارات</span><small>إدارة إذن إشعارات المتصفح</small></button><button class="account-setting-card" data-account-view="language"><span>🌐 اللغة والدولة</span><small>حفظ تفضيلاتك</small></button></div>';
+  }else if(accountView==="profile"){
+   title.textContent="معلومات الحساب";
+   content.innerHTML='<div class="account-info-card"><p class="account-note">البيانات هنا تُحفظ على هذا الجهاز فقط حاليًا، وليست مسترجعة من حساب تسجيل دخول. ربطها بالبريد المسجل والملف الشخصي الحقيقي يحتاج تفعيل نظام حسابات آمن.</p><form class="account-form" id="accountProfileForm"><label>الاسم<input name="name" autocomplete="name" maxlength="120" value="'+escHtml(profile.name)+'"></label><label>البريد الإلكتروني<input name="email" type="email" autocomplete="email" maxlength="200" value="'+escHtml(profile.email)+'"></label><label>رقم الهاتف<input name="phone" type="tel" autocomplete="tel" maxlength="30" value="'+escHtml(profile.phone)+'"></label><label>الدولة<input name="country" maxlength="100" value="'+escHtml(profile.country)+'" placeholder="مثال: ليبيا أو مصر"></label><div class="account-row"><button class="account-action" type="submit">حفظ البيانات على هذا الجهاز</button><button class="account-back" type="button" data-account-view="settings">رجوع للإعدادات</button></div><p id="profileSaveStatus" class="account-note" role="status"></p></form></div>';
+  }else if(accountView==="addresses"){
+   title.textContent="عناوين التوصيل";
+   content.innerHTML='<div class="account-info-card"><form class="account-form" id="addressForm"><label>اسم العنوان<input name="label" required maxlength="60" placeholder="البيت، الشغل..."></label><label>العنوان بالتفصيل<textarea name="address" required maxlength="500" rows="3" placeholder="المدينة والمنطقة والشارع وأقرب علامة"></textarea></label><label>رقم الهاتف للتوصيل<input name="phone" type="tel" maxlength="30" placeholder="رقم التواصل"></label><div class="account-row"><button class="account-action" type="submit">إضافة العنوان</button><button class="account-back" type="button" data-account-view="settings">رجوع للإعدادات</button></div></form><div id="savedAddresses">'+(addresses.length?addresses.map((a,i)=>'<div class="account-setting-card"><strong>'+escHtml(a.label)+'</strong><span>'+escHtml(a.address)+'</span><small>'+escHtml(a.phone||"")+'</small><button type="button" class="account-back" data-delete-address="'+i+'">حذف العنوان</button></div>').join(""):'<p class="account-note">لسه مفيش عناوين محفوظة على هذا الجهاز.</p>')+'</div><p class="account-note">عناوين الفروع ومناطق التوصيل الرسمية تظهر عند إكمال الطلب وفق البيانات المعتمدة للمتجر.</p></div>';
+  }else if(accountView==="notifications"){
+   title.textContent="الإشعارات";const permission=("Notification" in window)?Notification.permission:"unsupported";
+   content.innerHTML='<div class="account-info-card"><p>حالة إذن إشعارات المتصفح: <strong>'+({granted:"مسموح",denied:"مرفوض من إعدادات المتصفح",default:"لم يتم الاختيار",unsupported:"غير مدعوم في هذا المتصفح"}[permission]||permission)+'</strong></p><p class="account-note">السماح بالإشعارات من هنا لا يفعّل وحده إشعارات الطلبات من الخادم؛ يلزم إعداد خدمة إشعارات وربطها بحساب العميل.</p><div class="account-row"><button class="account-action" type="button" id="requestNotifications" '+(permission==="unsupported"||permission==="granted"||permission==="denied"?"disabled":"")+'>تفعيل إذن الإشعارات</button><button class="account-back" type="button" data-account-view="settings">رجوع للإعدادات</button></div><p id="notificationStatus" class="account-note" role="status"></p></div>';
+  }else if(accountView==="language"){
+   title.textContent="اللغة والدولة";const prefs=read("blaban_customer_preferences",{language:"ar",country:""});
+   content.innerHTML='<div class="account-info-card"><form id="preferencesForm" class="account-form"><label>اللغة المفضلة<select name="language"><option value="ar" '+(prefs.language==="ar"?"selected":"")+'>العربية</option><option value="en" '+(prefs.language==="en"?"selected":"")+'>English</option></select></label><label>الدولة<select name="country"><option value="">اختاري الدولة</option><option value="LY" '+(prefs.country==="LY"?"selected":"")+'>ليبيا</option><option value="EG" '+(prefs.country==="EG"?"selected":"")+'>مصر</option><option value="OTHER" '+(prefs.country==="OTHER"?"selected":"")+'>دولة أخرى</option></select></label><p class="account-note">سيتم حفظ الاختيار. الترجمة الكاملة لكل صفحات المتجر لم تُربط بعد، لذلك لن أعتبر تغيير اللغة مكتملًا قبل تنفيذها.</p><div class="account-row"><button class="account-action" type="submit">حفظ التفضيلات</button><button class="account-back" type="button" data-account-view="settings">رجوع للإعدادات</button></div><p id="preferencesStatus" class="account-note" role="status"></p></form></div>';
+  }else if(accountView==="orders"){
+   title.textContent="الطلبات السابقة";
+   content.innerHTML='<div class="account-info-card"><p>سجل الطلبات غير مربوط حاليًا بحساب عميل مسجّل الدخول؛ لا يمكن عرض طلبات بأمان اعتمادًا على البريد أو رقم الهاتف فقط.</p><p class="account-note">لإظهار الطلبات السابقة بشكل صحيح، نحتاج ربط تسجيل الدخول بجدول الطلبات وسياسات صلاحيات تمنع كل عميل من رؤية طلبات غيره.</p><div class="account-row"><button class="account-back" type="button" data-account-view="home">رجوع لحسابك</button></div></div>';
+  }
+ }
+ document.addEventListener("click",e=>{
+  const view=e.target.closest("[data-account-view]");
+  if(view){if(view.dataset.accountView==="about"){showRoute("about");return;}accountView=view.dataset.accountView;renderAccount();return;}
+  if(e.target.closest("[data-account-back]")||e.target.closest("[data-store-home]")){showRoute("home");return;}
+  const del=e.target.closest("[data-delete-address]");
+  if(del){const a=read("blaban_customer_addresses",[]);a.splice(Number(del.dataset.deleteAddress),1);write("blaban_customer_addresses",a);renderAccount();return;}
+  if(e.target.closest("#requestNotifications")){const out=document.getElementById("notificationStatus");if(!("Notification" in window)){out.textContent="المتصفح لا يدعم الإشعارات.";return;}Notification.requestPermission().then(p=>{if(out)out.textContent=p==="granted"?"تم السماح بإشعارات المتصفح. تفعيل إشعارات الطلبات يحتاج ربط خدمة الإشعارات.":p==="denied"?"الإشعارات مرفوضة من المتصفح.":"لم يتم السماح بالإشعارات.";renderAccount();});}
+ });
+ document.addEventListener("submit",e=>{
+  if(e.target.id==="accountProfileForm"){e.preventDefault();const ok=write("blaban_customer_profile",Object.fromEntries(new FormData(e.target).entries()));document.getElementById("profileSaveStatus").textContent=ok?"تم حفظ البيانات على هذا الجهاز.":"تعذر حفظ البيانات على الجهاز.";return;}
+  if(e.target.id==="addressForm"){e.preventDefault();const list=read("blaban_customer_addresses",[]);list.push(Object.fromEntries(new FormData(e.target).entries()));if(write("blaban_customer_addresses",list))renderAccount();return;}
+  if(e.target.id==="preferencesForm"){e.preventDefault();const ok=write("blaban_customer_preferences",Object.fromEntries(new FormData(e.target).entries()));document.getElementById("preferencesStatus").textContent=ok?"تم حفظ التفضيلات.":"تعذر حفظ التفضيلات.";return;}
+ });
+ document.querySelectorAll('.drawer-nav a[href="#account"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();showRoute("account");}));
+ document.querySelectorAll('.drawer-nav a[href="#about-app"]').forEach(a=>a.addEventListener("click",e=>{e.preventDefault();showRoute("about");}));
+})();
+
 </script>
 </body></html>
