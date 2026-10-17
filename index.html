@@ -1670,7 +1670,7 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
  }
  $("customerAddressForm").addEventListener("submit",async e=>{
   e.preventDefault();const c=client();if(!c||!activeUser)return;const btn=e.submitter;if(btn)btn.disabled=true;accountStatus("customerAddressStatus","جارٍ حفظ العنوان…");
-  const row={user_id:activeUser.id,label:$("addressLabel").value.trim(),recipient_name:$("addressRecipient").value.trim(),phone:$("addressPhone").value.trim(),country:$("addressCountry").value,governorate:$("addressCity").value.trim(),city:$("addressCity").value.trim(),area:$("addressArea").value.trim(),street_address:$("addressStreet").value.trim(),building_details:$("addressBuilding").value.trim()};
+  const row={user_id:activeUser.id,label:$("addressLabel").value.trim(),recipient_name:$("addressRecipient").value.trim(),phone:$("addressPhone").value.trim(),country:$("addressCountry").value,governorate:"",city:$("addressCity").value.trim(),area:$("addressArea").value.trim(),street_address:$("addressStreet").value.trim(),building_details:$("addressBuilding").value.trim()};
   try{const {error}=await c.from("customer_delivery_addresses").insert(row);if(error)throw error;$("customerAddressForm").reset();$("addressCountry").value=$("accountCountry").value||"ليبيا";accountStatus("customerAddressStatus","تم حفظ عنوان التوصيل.");await loadCustomerAddresses()}
   catch(err){accountStatus("customerAddressStatus","تعذر حفظ العنوان: "+(err.message||"حاولي مرة أخرى."))}
   finally{if(btn)btn.disabled=false}
@@ -1694,7 +1694,7 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
   links.forEach((el,i)=>{if(dict[keys[i]])setText(el,dict[keys[i]])});
   setText($("heroTitle"),dict.heroTitle);setText($("heroDescription"),dict.heroDescription);
   const heroLinks=document.querySelectorAll(".hero-links a");if(heroLinks[0])setText(heroLinks[0],dict.explore);if(heroLinks[1])setText(heroLinks[1],dict.cart);
-  setText($("accountPageTitle"),dict.account);setText($("accountPageSubtitle"),dict.settings);
+  const panelKey={home:"account",orders:"previousOrders",settings:"settings",profile:"profile",addresses:"addresses",notifications:"notifications",language:"language",about:"about"}[activePanel]||"account";setText($("accountPageTitle"),dict[panelKey]||dict.account);setText($("accountPageSubtitle"),dict.settings);
   document.querySelectorAll("[data-account-page]").forEach(el=>{const key=el.dataset.accountPage;if(dict[key]){const span=el.querySelector("span:last-child");if(span)setText(span,dict[key])}});
   const labels={"orderName":"name","orderPhone":"phone","orderAddress":"address","orderDeliveryZone":"zone","orderBranch":"branch","orderPaymentMethod":"payment"};
   Object.entries(labels).forEach(([id,key])=>{const label=document.querySelector('label[for="'+id+'"]');if(label&&dict[key])setText(label,dict[key])});
@@ -1727,7 +1727,7 @@ body.store-view-cart #cart.cart-page-open:before,body.store-view-checkout #check
    if(error)throw error;
    if(data?.reply){addSupportMessage(data.reply,"assistant");if(submit)submit.disabled=false;return}
    throw new Error("no AI response");
-  }catch(error){addSupportMessage(guidedAnswer(q),"assistant");}
+  }catch(error){addSupportMessage(guidedAnswer(q)+"\n\n(مساعدة إرشادية مؤقتة؛ خدمة الذكاء الاصطناعي غير متاحة حاليًا.)","assistant");}
   finally{if(submit)submit.disabled=false}
  });
  const savedLanguage=localStorage.getItem("blaban-store-language");if(savedLanguage)applyStoreLanguage(savedLanguage);
