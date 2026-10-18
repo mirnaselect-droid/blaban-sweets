@@ -755,7 +755,7 @@ body.store-view-checkout #checkout .checkout-close{position:sticky!important;top
 <div class="tracking-head"><span class="tracking-head-icon" aria-hidden="true">🚚</span><div><h2>تابعي طلبك خطوة بخطوة</h2><p>اكتبي رقم الطلب ورقم الموبايل اللي سجلتي بيه الطلب، وهنعرضلك آخر حالة وصل لها.</p></div></div>
 <form id="orderTrackingForm">
 <div class="tracking-field"><label for="trackingOrderNumber">رقم الطلب</label><input id="trackingOrderNumber" required maxlength="20" placeholder="مثال: BL-A1B2C3D4" autocomplete="off" dir="ltr"></div>
-<div class="tracking-field"><label for="trackingPhone">رقم الهاتف المسجل بالطلب</label><input id="trackingPhone" required maxlength="30" type="tel" inputmode="tel" placeholder="رقم الموبايل" autocomplete="tel"></div>
+<div class="tracking-field"><label for="trackingPhone">رقم الهاتف المسجل بالطلب <span style="font-weight:500;color:#70869b">(للعملاء)</span></label><input id="trackingPhone" maxlength="30" type="tel" inputmode="tel" placeholder="رقم الموبايل — مطلوب للعملاء" autocomplete="tel"></div>
 <button class="btn" id="trackOrderBtn" type="submit">تتبعي الطلب ←</button>
 </form>
 <div id="orderTrackingResult" role="status" aria-live="polite" hidden></div>
@@ -1069,10 +1069,26 @@ async function lookupOrderStatus(silent=false,forcedValues=null){
  const number=String(forcedValues?.order_number??document.getElementById("trackingOrderNumber").value??"").trim().toUpperCase();
  const phone=String(forcedValues?.phone??document.getElementById("trackingPhone").value??"").trim();
  const host=document.getElementById("orderTrackingResult"),button=document.getElementById("trackOrderBtn");
- if(!number||!phone){if(!silent){host.hidden=false;host.textContent="اكتبي رقم الطلب ورقم الهاتف الأول."}return}
+ if(!number){if(!silent){host.hidden=false;host.textContent="اكتبي رقم الطلب الأول."}return}
+ let accessToken="";
+ let ownerMode=false;
+ try{
+  const authClient=window.customerAuthClient;
+  if(authClient?.auth){
+   const {data:sessionData}=await authClient.auth.getSession();
+   accessToken=sessionData?.session?.access_token||"";
+   if(!phone&&accessToken){
+    const {data:adminData,error:adminError}=await authClient.rpc("is_admin");
+    ownerMode=!adminError&&adminData===true;
+   }
+  }
+ }catch(_){}
+ if(!phone&&!ownerMode){if(!silent){host.hidden=false;host.textContent="اكتبي رقم الهاتف المسجل بالطلب."}return}
  if(!silent){button.disabled=true;button.textContent="جارٍ البحث…";host.hidden=false;host.textContent="بندور على طلبك بأمان…"}
  try{
-  const response=await fetch(TRACKING_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({order_number:number,phone})});
+  const requestHeaders={"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY};
+  if(accessToken)requestHeaders.Authorization="Bearer "+accessToken;
+  const response=await fetch(TRACKING_ENDPOINT,{method:"POST",headers:requestHeaders,body:JSON.stringify({order_number:number,phone})});
   const payload=await response.json().catch(()=>({}));
   if(!response.ok||!payload.found){stopTrackingPolling();host.hidden=false;host.textContent=payload.error||"ملقيناش طلب مطابق للبيانات دي. راجعي رقم الطلب ورقم الهاتف.";return}
   renderTrackingResult(payload.order);
