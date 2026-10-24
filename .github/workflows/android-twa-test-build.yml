@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p app/src/main/java/com/blabansweets/app app/src/main/res/values
+          mkdir -p app/src/main/java/com/blabansweets/app app/src/main/res/values app/src/main/res/mipmap-mdpi app/src/main/res/mipmap-hdpi app/src/main/res/mipmap-xhdpi app/src/main/res/mipmap-xxhdpi app/src/main/res/mipmap-xxxhdpi
           cat > settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement {
@@ -79,7 +79,7 @@ jobs:
               namespace 'com.blabansweets.app'
               compileSdk 35
               defaultConfig {
-                  applicationId 'com.blabansweets.app'
+                  applicationId 'com.blabansweets.app.newicon'
                   minSdk 23
                   targetSdk 35
                   versionCode 1
@@ -92,6 +92,8 @@ jobs:
               <uses-permission android:name="android.permission.INTERNET" />
               <application
                   android:label="BLABAN-SWEETS"
+                  android:icon="@mipmap/ic_launcher"
+                  android:roundIcon="@mipmap/ic_launcher"
                   android:usesCleartextTraffic="false"
                   android:theme="@style/AppTheme"
                   android:hardwareAccelerated="true">
@@ -180,7 +182,11 @@ jobs:
               }
           }
           EOF
-          echo "Minimal Android project generated."
+          # Use the repository brand icon as the app launcher.
+          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            cp icons/blaban-icon-512.png "app/src/main/res/mipmap-${density}/ic_launcher.png"
+          done
+          echo "Isolated Android project generated with launcher icon."
 
       - name: Build debug APK
         run: gradle --no-daemon --stacktrace assembleDebug
