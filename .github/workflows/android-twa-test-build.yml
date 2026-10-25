@@ -186,7 +186,8 @@ jobs:
           for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
             cp icons/blaban-icon-512.png "app/src/main/res/mipmap-${density}/ic_launcher.png"
           done
-          cp icons/blaban-icon-512.png app/src/main/res/drawable-nodpi/ic_launcher_foreground.png
+          # Keep the complete logo inside Android's adaptive-icon safe zone.
+          convert icons/blaban-icon-512.png -resize 66%x66% -gravity center -background none -extent 512x512 app/src/main/res/drawable-nodpi/ic_launcher_foreground.png
           cat > app/src/main/res/values/launcher_colors.xml <<'EOF'
           <resources><color name="ic_launcher_background">#FFFFFF</color></resources>
           EOF
