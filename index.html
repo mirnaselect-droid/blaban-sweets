@@ -1149,7 +1149,7 @@ function closeCheckoutModal(){
 
 
 /* Customer storefront authentication uses a separate storage key from admin.html. */
-const CUSTOMER_AUTH_REDIRECT=window.location.origin+window.location.pathname;
+const CUSTOMER_AUTH_REDIRECT=window.location.origin+window.location.pathname; // Confirmation should return to this storefront URL; it must be allowed in Supabase Auth URL Configuration.
 let customerAuthClient=null;
 let customerAuthMode="login";
 function customerAuthMessage(message){const el=document.getElementById("customerAuthMessage");if(el)el.textContent=message||""}
@@ -1233,7 +1233,7 @@ document.getElementById("customerAuthForm").addEventListener("submit",async even
    result=await customerAuthClient.auth.signUp({email,password,options:{emailRedirectTo:CUSTOMER_AUTH_REDIRECT,data:{full_name:fullName}}});
    if(result.error)throw result.error;
    if(result.data.session?.user){openCustomerStore(result.data.session.user);customerAuthMessage("");}
-   else customerAuthMessage("الحساب اتعمل بنجاح 💗 افتحي إيميلك واضغطي رابط تأكيد الحساب، وبعدها ارجعي للمتجر وسجّلي دخولك.");
+   else customerAuthMessage("تم استلام طلب إنشاء حسابك بنجاح. أرسلنا رسالة تأكيد إلى بريدك الإلكتروني. افتحي الرسالة واضغطي «تأكيد البريد الإلكتروني» لتفعيل حسابك والعودة إلى متجر حلو بلبن. إذا لم تصلك الرسالة، تحققي من مجلد الرسائل غير المرغوب فيها (Spam).");
   }else if(customerAuthMode==="reset"){
    result=await customerAuthClient.auth.resetPasswordForEmail(email,{redirectTo:CUSTOMER_AUTH_REDIRECT});
    if(result.error)throw result.error;
