@@ -182,13 +182,27 @@ jobs:
               }
           }
           EOF
-          # Keep the original logo as the legacy launcher icon. Generate a padded adaptive foreground
-          # from the same repository asset using Android's ImageMagick-free SVG renderer (rsvg-convert unavailable),
-          # so use a simple SVG wrapper converted by Android's own resource pipeline instead.
-          cp icons/blaban-icon-512.png app/src/main/res/drawable-nodpi/ic_launcher_foreground.png
-          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-            cp icons/blaban-icon-512.png "app/src/main/res/mipmap-${density}/ic_launcher.png"
-          done
+          # Rebuild the launcher icon from the tracked SVG, avoiding the corrupt PNG files.
+          python3 -m pip install --quiet cairosvg pillow
+          cat > /tmp/launcher.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+            <rect width="512" height="512" rx="112" fill="#ffffff"/>
+            <ellipse cx="256" cy="232" rx="218" ry="178" fill="#0879d9"/>
+            <ellipse cx="256" cy="232" rx="194" ry="154" fill="#ffffff"/>
+            <ellipse cx="256" cy="232" rx="178" ry="138" fill="#0879d9"/>
+            <text x="256" y="247" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="70" font-weight="bold" fill="#ffffff">حلو بلبن</text>
+            <text x="256" y="340" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="34" font-weight="bold" fill="#0879d9">BLABAN Sweets</text>
+          </svg>
+          SVG
+          python3 - <<'PY'
+          import cairosvg
+          from PIL import Image, ImageDraw
+          cairosvg.svg2png(url='/tmp/launcher.svg', write_to='/tmp/launcher.png', output_width=512, output_height=512)
+          im=Image.open('/tmp/launcher.png').convert('RGBA')
+          im.save('app/src/main/res/drawable-nodpi/ic_launcher_foreground.png')
+          for density, size in [('mdpi',48),('hdpi',72),('xhdpi',96),('xxhdpi',144),('xxxhdpi',192)]:
+              im.resize((size,size),Image.Resampling.LANCZOS).save(f'app/src/main/res/mipmap-{density}/ic_launcher.png')
+          PY
           cat > app/src/main/res/values/launcher_colors.xml <<'EOF'
           <resources><color name="ic_launcher_background">#FFFFFF</color></resources>
           EOF
