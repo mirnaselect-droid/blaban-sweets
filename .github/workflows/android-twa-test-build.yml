@@ -79,7 +79,7 @@ jobs:
               namespace 'com.blabansweets.app'
               compileSdk 35
               defaultConfig {
-                  applicationId 'com.blabansweets.app.icon20261025'
+                  applicationId 'com.blabansweets.app.icon20261026'
                   minSdk 23
                   targetSdk 35
                   versionCode 1
