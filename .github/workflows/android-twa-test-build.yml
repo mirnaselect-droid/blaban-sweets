@@ -190,7 +190,7 @@ jobs:
           from PIL import Image, ImageOps
           src = Image.open('/tmp/blaban-logo.jpg').convert('RGB')
           # Fit the full original logo into a square without cropping any lettering.
-          icon = ImageOps.contain(src, (512, 512), method=Image.Resampling.LANCZOS)
+          icon = ImageOps.contain(src, (320, 320), method=Image.Resampling.LANCZOS)
           canvas = Image.new('RGB', (512, 512), 'white')
           canvas.paste(icon, ((512-icon.width)//2, (512-icon.height)//2))
           rgba = canvas.convert('RGBA')
