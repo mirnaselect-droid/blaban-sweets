@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p app/src/main/java/com/blabansweets/app app/src/main/res/values app/src/main/res/mipmap-mdpi app/src/main/res/mipmap-hdpi app/src/main/res/mipmap-xhdpi app/src/main/res/mipmap-xxhdpi app/src/main/res/mipmap-xxxhdpi
+          mkdir -p app/src/main/java/com/blabansweets/app app/src/main/res/values app/src/main/res/drawable-nodpi app/src/main/res/mipmap-anydpi-v26 app/src/main/res/mipmap-mdpi app/src/main/res/mipmap-hdpi app/src/main/res/mipmap-xhdpi app/src/main/res/mipmap-xxhdpi app/src/main/res/mipmap-xxxhdpi
           cat > settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement {
@@ -182,11 +182,31 @@ jobs:
               }
           }
           EOF
-          # Use the repository brand icon as the app launcher.
-          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-            cp icons/blaban-icon-512.png "app/src/main/res/mipmap-${density}/ic_launcher.png"
-          done
-          echo "Isolated Android project generated with launcher icon."
+          # Generate correctly sized legacy icons and a modern adaptive launcher icon.
+          python3 - <<'PY'
+          from PIL import Image, ImageOps
+          from pathlib import Path
+          src = Image.open('icons/blaban-icon-512.png').convert('RGBA')
+          sizes = {'mdpi':48, 'hdpi':72, 'xhdpi':96, 'xxhdpi':144, 'xxxhdpi':192}
+          for density, size in sizes.items():
+              out = ImageOps.fit(src, (size, size), method=Image.Resampling.LANCZOS)
+              out.save(f'app/src/main/res/mipmap-{density}/ic_launcher.png', optimize=True)
+          # Keep the full logo inside Android's adaptive-icon safe zone.
+          fg = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
+          logo = ImageOps.contain(src, (340, 340), method=Image.Resampling.LANCZOS)
+          fg.alpha_composite(logo, ((512-logo.width)//2, (512-logo.height)//2))
+          fg.save('app/src/main/res/drawable-nodpi/ic_launcher_foreground.png', optimize=True)
+          PY
+          cat > app/src/main/res/values/launcher_colors.xml <<'EOF'
+          <resources><color name="ic_launcher_background">#FFFFFF</color></resources>
+          EOF
+          cat > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'EOF'
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/ic_launcher_background" />
+              <foreground android:drawable="@drawable/ic_launcher_foreground" />
+          </adaptive-icon>
+          EOF
+          echo "Adaptive and density-specific launcher icons generated."
 
       - name: Build debug APK
         run: gradle --no-daemon --stacktrace assembleDebug
