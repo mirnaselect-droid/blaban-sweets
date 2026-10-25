@@ -182,26 +182,22 @@ jobs:
               }
           }
           EOF
-          # Rebuild the launcher icon from the tracked SVG, avoiding the corrupt PNG files.
-          python3 -m pip install --quiet cairosvg pillow
-          cat > /tmp/launcher.svg <<'SVG'
-          <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-            <rect width="512" height="512" rx="112" fill="#ffffff"/>
-            <ellipse cx="256" cy="232" rx="218" ry="178" fill="#0879d9"/>
-            <ellipse cx="256" cy="232" rx="194" ry="154" fill="#ffffff"/>
-            <ellipse cx="256" cy="232" rx="178" ry="138" fill="#0879d9"/>
-            <text x="256" y="247" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="70" font-weight="bold" fill="#ffffff">حلو بلبن</text>
-            <text x="256" y="340" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="34" font-weight="bold" fill="#0879d9">BLABAN Sweets</text>
-          </svg>
-          SVG
+          # Use the exact logo image already committed on main; do not redraw Arabic lettering.
+          git fetch --depth=1 origin main
+          git show FETCH_HEAD:1792890214643.jpg > /tmp/blaban-logo.jpg
+          python3 -m pip install --quiet pillow
           python3 - <<'PY'
-          import cairosvg
-          from PIL import Image, ImageDraw
-          cairosvg.svg2png(url='/tmp/launcher.svg', write_to='/tmp/launcher.png', output_width=512, output_height=512)
-          im=Image.open('/tmp/launcher.png').convert('RGBA')
-          im.save('app/src/main/res/drawable-nodpi/ic_launcher_foreground.png')
+          from PIL import Image, ImageOps
+          src = Image.open('/tmp/blaban-logo.jpg').convert('RGB')
+          # Fit the full original logo into a square without cropping any lettering.
+          icon = ImageOps.contain(src, (512, 512), method=Image.Resampling.LANCZOS)
+          canvas = Image.new('RGB', (512, 512), 'white')
+          canvas.paste(icon, ((512-icon.width)//2, (512-icon.height)//2))
+          rgba = canvas.convert('RGBA')
+          rgba.save('app/src/main/res/drawable-nodpi/ic_launcher_foreground.png')
           for density, size in [('mdpi',48),('hdpi',72),('xhdpi',96),('xxhdpi',144),('xxxhdpi',192)]:
-              im.resize((size,size),Image.Resampling.LANCZOS).save(f'app/src/main/res/mipmap-{density}/ic_launcher.png')
+              canvas.resize((size,size),Image.Resampling.LANCZOS).save(f'app/src/main/res/mipmap-{density}/ic_launcher.png')
+          print('Launcher icon generated from repository logo:', src.size)
           PY
           cat > app/src/main/res/values/launcher_colors.xml <<'EOF'
           <resources><color name="ic_launcher_background">#FFFFFF</color></resources>
